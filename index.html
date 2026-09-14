@@ -1,13 +1,239 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MartialCore | Gestão Modular para Centros de Luta</title>
+    <meta name="description" content="Plataforma web modular para gestão multi-modalidades de artes marciais: BJJ, Muay Thai, Karatê, Judô, Capoeira e Boxe.">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <meta name="keywords" content="artes marciais, gestao de academia, bjj, muay thai, karate, judo, capoeira, boxe, graduacao, software academia">
+    <meta name="author" content="Valderi Alves de Souza Neto">
+
+    <!-- Verificação de Propriedade do Google Search Console -->
+    <meta name="google-site-verification" content="googlea3ed000c3cf65c57" />
+
+    <!-- Open Graph / Redes Sociais -->
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MartialCore - Gestão Inteligente para Artes Marciais">
+    <meta property="og:description" content="Plataforma modular para gerenciamento técnico, turmas e graduações em centros de treinamento multi-lutas.">
+    <meta property="og:url" content="https://valderi.mestre.web.ufersa.dev.br/">
+    <meta property="og:site_name" content="MartialCore">
+
+    <!-- Dados Estruturados: FAQPage (Schema.org / Google Search) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "O que é o MartialCore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O MartialCore é uma plataforma web modular voltada para a gestão integrada de centros de treinamento e academias multi-modalidades de artes marciais, como Jiu-Jitsu, Muay Thai, Karatê, Judô, Capoeira e Boxe."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como a plataforma gerencia diferentes modalidades e graduações?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O sistema adapta automaticamente regras, tempos de carência, faixas, graus, cordéis e critérios técnicos específicos para cada modalidade do tatame de forma isolada por metadados."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O MartialCore possui controle de frequência e financeiro?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim, a plataforma unifica o controle de check-in em tatames, cálculo de presenças para exames de graduação, planos e gestão de adimplência em um único banco de dados relacional."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Tailwind CSS CDN para renderização imediata -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased selection:bg-amber-500 selection:text-black">
+
+    <!-- Navbar -->
+    <header class="border-b border-zinc-800 bg-zinc-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2">
+                <span class="p-1.5 bg-amber-500 text-black rounded-md font-black text-lg leading-none">MC</span>
+                <span class="text-xl font-black text-amber-500 tracking-wider">MARTIAL<span class="text-white">CORE</span></span>
+            </a>
+            <nav class="flex items-center gap-6 text-sm">
+                <a href="#modalidades" class="text-zinc-400 hover:text-white transition">Modalidades</a>
+                <a href="#funcionalidades" class="text-zinc-400 hover:text-white transition">Funcionalidades</a>
+                <a href="#arquitetura" class="text-zinc-400 hover:text-white transition">Arquitetura</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-20 md:py-28 px-6 text-center max-w-4xl mx-auto">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Gestão Especializada
+        </span>
+        <h1 class="text-4xl md:text-6xl font-black mt-6 leading-tight tracking-tight">
+            Gestão inteligente para centros de treinamento <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">multi-artes marciais</span>.
+        </h1>
+        <p class="text-zinc-400 text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed">
+            Plataforma web modular que adapta regras, nomenclaturas, faixas, graus e critérios técnicos para cada modalidade do seu tatame.
+        </p>
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+            <a href="#modalidades" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold px-6 py-3.5 rounded-lg transition shadow-lg shadow-amber-500/20">
+                Ver Modalidades <i data-lucide="arrow-down" class="w-4 h-4"></i>
+            </a>
+            <a href="#funcionalidades" class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 font-semibold px-6 py-3.5 rounded-lg transition">
+                Recursos do Sistema
+            </a>
+        </div>
+    </section>
+
+    <!-- Modalidades -->
+    <section id="modalidades" class="py-20 bg-zinc-900/60 border-t border-zinc-800 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <h2 class="text-3xl font-extrabold tracking-tight">Modalidades Contempladas</h2>
+                <p class="text-zinc-400 mt-3 text-sm">Cada arte marcial conta com seu esquema de graduação e critérios de avaliação isolados por metadados.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- BJJ -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Brazilian Jiu-Jitsu</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Faixas e Graus (Gi & No-Gi)</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Controle de carência mínima por faixa, contagem de presenças e registro de até 4 graus por graduação.</p>
+                </div>
+
+                <!-- Muay Thai -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="flame" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Muay Thai</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Cordéis (Prajied / Kruang)</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Acompanhamento por rounds de sparring, corte de peso, pesagens e histórico de exames técnicos.</p>
+                </div>
+
+                <!-- Karatê -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="swords" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Karatê</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Kyu e Dan (Estilos)</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Avaliações segmentadas por Kata e Kumite com suporte aos estilos Shotokan, Goju-Ryu, Shito-Ryu e Wado-Ryu.</p>
+                </div>
+
+                <!-- Judô -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Judô</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Sistema Gokyo e CBJ</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Mapeamento de técnicas dominadas de Nage-waza e Katame-waza, histórico federativo e exames.</p>
+                </div>
+
+                <!-- Capoeira -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="music" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Capoeira</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Cordéis e Batizados</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Estrutura por estilos (Regional, Angola e Contemporânea), histórico de batizados e domínio instrumental.</p>
+                </div>
+
+                <!-- Boxe -->
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-amber-500/40 transition group">
+                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-105 transition">
+                        <i data-lucide="dumbbell" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Boxe</h3>
+                    <p class="text-xs text-amber-500 font-medium mt-1">Categorias de Peso & Sparring</p>
+                    <p class="text-sm text-zinc-400 mt-3 leading-relaxed">Progressão contínua por tempo de treino, minutagem acumulada em ringue e pesagens periódicas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Funcionalidades -->
+    <section id="funcionalidades" class="py-20 border-t border-zinc-800 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <h2 class="text-3xl font-extrabold tracking-tight">Recursos do Núcleo Compartilhado</h2>
+                <p class="text-zinc-400 mt-3 text-sm">Operações essenciais unificadas em uma única base de dados relacional.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+                    <div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center text-amber-400 mb-4">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-lg">Controle de Acesso (RBAC)</h3>
+                    <p class="text-sm text-zinc-400 mt-2">Permissões personalizadas para Administradores, Mestres/Instrutores, Atletas e Visitantes.</p>
+                </div>
+
+                <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+                    <div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center text-amber-400 mb-4">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-lg">Presença e Horários</h3>
+                    <p class="text-sm text-zinc-400 mt-2">Alocação de tatames e registro de check-in com cálculo automático de carência para promoção.</p>
+                </div>
+
+                <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+                    <div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center text-amber-400 mb-4">
+                        <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-lg">Gestão Financeira</h3>
+                    <p class="text-sm text-zinc-400 mt-2">Planos individuais, pacotes multi-modalidades, histórico de pagamentos e adimplência.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Arquitetura Cloud -->
+    <section id="arquitetura" class="py-16 bg-zinc-900/40 border-t border-zinc-800 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-2xl font-bold">Infraestrutura em Nuvem (AWS)</h2>
+            <p class="text-sm text-zinc-400 mt-2">Hospedagem monolítica segura com EC2 (Subnet Pública), RDS PostgreSQL (Subnet Privada) e S3.</p>
+            <div class="mt-6 flex flex-wrap justify-center gap-3 text-xs font-mono">
+                <span class="px-3 py-1.5 bg-zinc-800 rounded-md border border-zinc-700">Amazon EC2</span>
+                <span class="px-3 py-1.5 bg-zinc-800 rounded-md border border-zinc-700">Amazon RDS (PostgreSQL)</span>
+                <span class="px-3 py-1.5 bg-zinc-800 rounded-md border border-zinc-700">Amazon S3</span>
+                <span class="px-3 py-1.5 bg-zinc-800 rounded-md border border-zinc-700">AWS Amplify</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-xs text-zinc-500 border-t border-zinc-800">
+        <p>&copy; 2026 MartialCore — Projeto PAM0462 (Programação Web - UFERSA).</p>
+    </footer>
+
+    <!-- Ponto de montagem do React -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+    <!-- Inicializa os ícones -->
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
 </html>
