@@ -74,6 +74,7 @@
             <nav class="flex items-center gap-6 text-sm">
                 <a href="#modalidades" class="text-zinc-400 hover:text-white transition">Modalidades</a>
                 <a href="#funcionalidades" class="text-zinc-400 hover:text-white transition">Funcionalidades</a>
+                <a href="#faq" class="text-zinc-400 hover:text-white transition">FAQ</a>
                 <a href="#arquitetura" class="text-zinc-400 hover:text-white transition">Arquitetura</a>
             </nav>
         </div>
@@ -208,8 +209,44 @@
         </div>
     </section>
 
+    <!-- FAQ (Perguntas Frequentes) Visível -->
+    <section id="faq" class="py-20 bg-zinc-900/40 border-t border-zinc-800 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">
+                    Dúvidas Frequentes
+                </span>
+                <h2 class="text-3xl font-extrabold tracking-tight mt-4">Perguntas Frequentes (FAQ)</h2>
+                <p class="text-zinc-400 mt-2 text-sm">Respostas diretas sobre o funcionamento e estrutura do MartialCore.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <h3 class="font-bold text-white text-lg">O que é o MartialCore?</h3>
+                    <p class="text-sm text-zinc-400 mt-2 leading-relaxed">
+                        O MartialCore é uma plataforma web modular voltada para a gestão integrada de centros de treinamento e academias multi-modalidades de artes marciais, como Jiu-Jitsu, Muay Thai, Karatê, Judô, Capoeira e Boxe.
+                    </p>
+                </div>
+
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <h3 class="font-bold text-white text-lg">Como a plataforma gerencia diferentes modalidades e graduações?</h3>
+                    <p class="text-sm text-zinc-400 mt-2 leading-relaxed">
+                        O sistema adapta automaticamente regras, tempos de carência, faixas, graus, cordéis e critérios técnicos específicos para cada modalidade do tatame de forma isolada por metadados.
+                    </p>
+                </div>
+
+                <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <h3 class="font-bold text-white text-lg">O MartialCore possui controle de frequência e financeiro?</h3>
+                    <p class="text-sm text-zinc-400 mt-2 leading-relaxed">
+                        Sim, a plataforma unifica o controle de check-in em tatames, cálculo de presenças para exames de graduação, planos e gestão de adimplência em um único banco de dados relacional.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Arquitetura Cloud -->
-    <section id="arquitetura" class="py-16 bg-zinc-900/40 border-t border-zinc-800 px-6">
+    <section id="arquitetura" class="py-16 bg-zinc-900/60 border-t border-zinc-800 px-6">
         <div class="max-w-4xl mx-auto text-center">
             <h2 class="text-2xl font-bold">Infraestrutura em Nuvem (AWS)</h2>
             <p class="text-sm text-zinc-400 mt-2">Hospedagem monolítica segura com EC2 (Subnet Pública), RDS PostgreSQL (Subnet Privada) e S3.</p>
