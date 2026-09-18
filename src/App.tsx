@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import type { ModalityId, UserRole } from './types/martial';
-import { RoleSimulatorBar } from './components/layout/RoleSimulatorBar';
+import { ThemeProvider } from './context/ThemeContext';
+import { MartialThemeProvider, useMartialTheme } from './context/MartialThemeContext';
+import { AmbientAura } from './components/layout/AmbientAura';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
+import { ModalityHeroBanner } from './components/layout/ModalityHeroBanner';
+import { BottomNavMobile } from './components/layout/BottomNavMobile';
 import { LandingPage } from './pages/LandingPage';
+import { AuthModal } from './components/auth/AuthModal';
 
 // Admin Views
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -23,31 +28,32 @@ import { StudentPortal } from './pages/student/StudentPortal';
 // Visitor Views
 import { TrialClassBooking } from './pages/visitor/TrialClassBooking';
 
-export default function App() {
-  const [isLandingActive, setIsLandingActive] = useState<boolean>(false);
-  const [currentRole, setCurrentRole] = useState<UserRole>('admin');
-  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>('all');
-  const [activeView, setActiveView] = useState<string>('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+interface SystemContainerProps {
+  currentRole: UserRole;
+  onLogout: () => void;
+}
 
-  // Ajusta a view inicial ao trocar de perfil
-  const handleRoleChange = (role: UserRole) => {
-    setCurrentRole(role);
+function SystemContainer({
+  currentRole,
+  onLogout
+}: SystemContainerProps) {
+  const getInitialView = (role: UserRole) => {
     switch (role) {
       case 'admin':
-        setActiveView('dashboard');
-        break;
+        return 'dashboard';
       case 'instructor':
-        setActiveView('attendance');
-        break;
+        return 'attendance';
       case 'student':
-        setActiveView('progress');
-        break;
+        return 'progress';
       case 'visitor':
-        setActiveView('trial');
-        break;
+        return 'trial';
     }
   };
+
+  const [activeView, setActiveView] = useState<string>(() => getInitialView(currentRole));
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const { selectedModality, setSelectedModality } = useMartialTheme();
 
   // Renderizador da View do Sistema de acordo com o Perfil RBAC ativo
   const renderSystemView = () => {
@@ -119,45 +125,92 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-amber-500 selection:text-black">
-      {/* 1. Barra Flutuante de Simulação de Perfis (Ideal para apresentação e testes) */}
-      <RoleSimulatorBar
-        currentRole={currentRole}
-        onRoleChange={handleRoleChange}
-        isLandingActive={isLandingActive}
-        onToggleLanding={setIsLandingActive}
-      />
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-amber-500 selection:text-black transition-colors duration-300 relative">
+      {/* Luz Atmosférica Dinâmica por Arte Marcial */}
+      <AmbientAura />
 
-      {/* 2. Visualização da Landing Page ou Sistema */}
-      {isLandingActive ? (
-        <LandingPage onEnterApp={() => setIsLandingActive(false)} />
-      ) : (
-        <div className="flex-1 flex flex-col">
-          {/* Header da Aplicação */}
-          <Navbar
+      <div className="flex-1 flex flex-col relative z-10">
+        {/* Header da Aplicação com Navegação por Modalidades, Toggle de Tema e Sair */}
+        <Navbar
+          currentRole={currentRole}
+          selectedModality={selectedModality}
+          onSelectModality={setSelectedModality}
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          onLogout={onLogout}
+        />
+
+        {/* Layout Principal: Sidebar + Conteúdo da Tela */}
+        <div className="flex-1 flex">
+          <Sidebar
             currentRole={currentRole}
-            selectedModality={selectedModality}
-            onSelectModality={setSelectedModality}
-            onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-            onGoToLanding={() => setIsLandingActive(true)}
+            activeView={activeView}
+            onSelectView={setActiveView}
+            isOpenMobile={isMobileMenuOpen}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
+            onLogout={onLogout}
           />
 
-          {/* Layout Principal: Sidebar + Conteúdo da Tela */}
-          <div className="flex-1 flex">
-            <Sidebar
-              currentRole={currentRole}
-              activeView={activeView}
-              onSelectView={setActiveView}
-              isOpenMobile={isMobileMenuOpen}
-              onCloseMobile={() => setIsMobileMenuOpen(false)}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-x-hidden pb-24 md:pb-12">
+            {/* Banner de Ambientação da Modalidade Ativa */}
+            <ModalityHeroBanner
+              selectedModality={selectedModality}
+              onClearFilter={() => setSelectedModality('all')}
             />
 
-            <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
-              {renderSystemView()}
-            </main>
-          </div>
+            {/* View do Módulo Ativo */}
+            {renderSystemView()}
+          </main>
         </div>
-      )}
+
+        {/* Navegação Inferior Otimizada para Mobile (Bottom Navigation) */}
+        <BottomNavMobile
+          currentRole={currentRole}
+          activeView={activeView}
+          onSelectView={setActiveView}
+        />
+      </div>
     </div>
+  );
+}
+
+export default function App() {
+  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>('all');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [currentRole, setCurrentRole] = useState<UserRole>('admin');
+
+  const handleLogin = (role: UserRole) => {
+    setCurrentRole(role);
+    setIsAuthenticated(true);
+    setIsAuthModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <ThemeProvider>
+      <MartialThemeProvider
+        selectedModality={selectedModality}
+        setSelectedModality={setSelectedModality}
+      >
+        {!isAuthenticated ? (
+          <>
+            <LandingPage onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+            <AuthModal
+              isOpen={isAuthModalOpen}
+              onClose={() => setIsAuthModalOpen(false)}
+              onLogin={handleLogin}
+            />
+          </>
+        ) : (
+          <SystemContainer
+            currentRole={currentRole}
+            onLogout={handleLogout}
+          />
+        )}
+      </MartialThemeProvider>
+    </ThemeProvider>
   );
 }

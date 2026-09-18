@@ -1,5 +1,6 @@
 import React from 'react';
 import type { UserRole } from '../../types/martial';
+import { useMartialTheme } from '../../context/MartialThemeContext';
 import {
   LayoutDashboard,
   Users,
@@ -12,7 +13,8 @@ import {
   Compass,
   BookmarkCheck,
   Layers,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 
 export type AdminView = 'dashboard' | 'students' | 'schedules' | 'finance' | 'modalities';
@@ -26,6 +28,7 @@ interface SidebarProps {
   onSelectView: (view: string) => void;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -33,28 +36,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeView,
   onSelectView,
   isOpenMobile = false,
-  onCloseMobile
+  onCloseMobile,
+  onLogout
 }) => {
+  const { accentColor } = useMartialTheme();
+
   const getNavItems = () => {
     switch (currentRole) {
       case 'admin':
         return [
-          { id: 'dashboard', label: 'Dashboard Geral', icon: LayoutDashboard, badge: 'KPIs' },
-          { id: 'students', label: 'Alunos & Matrículas', icon: Users, badge: '6 Ativos' },
+          { id: 'dashboard', label: 'Dashboard Geral', icon: LayoutDashboard },
+          { id: 'students', label: 'Alunos & Matrículas', icon: Users, badge: '6' },
           { id: 'schedules', label: 'Tatames & Horários', icon: CalendarDays },
-          { id: 'finance', label: 'Planos & Financeiro', icon: DollarSign, badge: 'Fluxo' },
-          { id: 'modalities', label: 'Regras de Graduação', icon: Layers, badge: 'Metadados' }
+          { id: 'finance', label: 'Planos & Financeiro', icon: DollarSign },
+          { id: 'modalities', label: 'Regras de Graduação', icon: Layers }
         ];
       case 'instructor':
         return [
-          { id: 'attendance', label: 'Tatame Digital (Chamada)', icon: ClipboardCheck, badge: 'Hoje' },
+          { id: 'attendance', label: 'Tatame Digital', icon: ClipboardCheck, badge: 'Hoje' },
           { id: 'evaluations', label: 'Avaliações Técnicas', icon: FileCheck2 },
-          { id: 'eligible', label: 'Aptos para Exame', icon: Award, badge: '3 Alunos' }
+          { id: 'eligible', label: 'Aptos para Exame', icon: Award, badge: '3' }
         ];
       case 'student':
         return [
-          { id: 'progress', label: 'Meu Tatame & Faixas', icon: Trophy, badge: 'Ativo' },
-          { id: 'schedules', label: 'Minhas Aulas & Check-in', icon: CalendarDays },
+          { id: 'progress', label: 'Meu Tatame & Faixas', icon: Trophy },
+          { id: 'schedules', label: 'Minhas Aulas', icon: CalendarDays },
           { id: 'invoices', label: 'Minhas Mensalidades', icon: DollarSign }
         ];
       case 'visitor':
@@ -78,20 +84,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Overlay Mobile */}
       {isOpenMobile && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-xs transition-opacity"
           onClick={onCloseMobile}
         />
       )}
 
       <aside
-        className={`fixed md:sticky top-[101px] left-0 h-[calc(100vh-101px)] bg-zinc-950/95 border-r border-zinc-800/80 w-64 p-4 z-40 flex flex-col justify-between transition-transform duration-200 ${
+        className={`fixed md:sticky top-[64px] left-0 h-[calc(100vh-64px)] bg-white/95 dark:bg-zinc-950/95 border-r border-zinc-200/70 dark:border-zinc-800/70 w-64 p-4 z-40 flex flex-col justify-between transition-all duration-200 ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <div className="space-y-6">
-          <div className="px-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-              Módulos do Sistema
+        <div className="space-y-4">
+          <div className="px-3 pt-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-mono">
+              Navegação
             </span>
           </div>
 
@@ -99,23 +105,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {navItems.map(item => {
               const Icon = item.icon;
               const isActive = activeView === item.id;
+
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleItemClick(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer group ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer group ${
                     isActive
-                      ? 'bg-amber-500 text-black font-bold shadow-lg shadow-amber-500/10'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
+                      ? 'text-white shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-zinc-900/80'
                   }`}
+                  style={{
+                    backgroundColor: isActive ? accentColor : undefined,
+                    boxShadow: isActive ? `0 2px 10px -2px ${accentColor}50` : undefined
+                  }}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon
-                      className={`w-4 h-4 transition ${
-                        isActive ? 'text-black' : 'text-zinc-400 group-hover:text-amber-400'
-                      }`}
-                    />
+                    <Icon className="w-4 h-4 transition shrink-0" />
                     <span>{item.label}</span>
                   </div>
 
@@ -124,8 +131,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                           isActive
-                            ? 'bg-black/20 text-black font-extrabold'
-                            : 'bg-zinc-800 text-zinc-400'
+                            ? 'bg-black/20 text-white font-bold'
+                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
                         }`}
                       >
                         {item.badge}
@@ -133,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                     <ChevronRight
                       className={`w-3.5 h-3.5 opacity-40 group-hover:opacity-100 ${
-                        isActive ? 'text-black' : ''
+                        isActive ? 'text-white opacity-80' : ''
                       }`}
                     />
                   </div>
@@ -143,20 +150,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Rodapé da Sidebar: Info da Disciplina & AWS */}
-        <div className="pt-4 border-t border-zinc-900 text-[11px] text-zinc-400 space-y-1 px-2 font-mono">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span>PAM0462 UFERSA</span>
-            <span className="text-amber-500 font-bold">2026.2</span>
-          </div>
-          <p className="text-[10px] text-zinc-400 truncate">Aluno: Valderi Neto</p>
-          <div className="flex items-center gap-1.5 pt-1 text-[10px] text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>Amplify Online (SSL)</span>
+        {/* Rodapé da Sidebar */}
+        <div className="space-y-3">
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="w-full py-2 px-3 rounded-xl bg-zinc-100 hover:bg-red-500/10 dark:bg-zinc-900/60 dark:hover:bg-red-500/15 border border-zinc-200 dark:border-zinc-800 text-zinc-600 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sair / Voltar ao Site</span>
+            </button>
+          )}
+
+          <div className="pt-3 border-t border-zinc-200/70 dark:border-zinc-900 text-[11px] text-zinc-500 dark:text-zinc-400 space-y-1 px-2 font-mono">
+            <div className="flex items-center justify-between">
+              <span>PAM0462 UFERSA</span>
+              <span className="font-bold text-amber-500">2026.2</span>
+            </div>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate">Valderi Alves Neto</p>
+            <div className="flex items-center gap-1.5 pt-1 text-[10px] text-emerald-500 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>AWS Amplify Online</span>
+            </div>
           </div>
         </div>
       </aside>
     </>
   );
 };
-

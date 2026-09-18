@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { ModalityId } from '../../types/martial';
 import { SCHEDULES_DATA, MODALITIES_DATA } from '../../mock/martialData';
+import { MartialIcon } from '../../components/martial/MartialIcon';
+import { useMartialTheme } from '../../context/MartialThemeContext';
 import {
   Clock,
   MapPin,
@@ -14,6 +16,7 @@ interface SchedulesManagementProps {
 }
 
 export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ selectedModality }) => {
+  const { accentColor } = useMartialTheme();
   const [selectedDay, setSelectedDay] = useState<string>('all');
   const [selectedSpace, setSelectedSpace] = useState<string>('all');
 
@@ -28,14 +31,14 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* Topo */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
             Alocação de Tatames & Grade de Horários
           </h1>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             Gestão de espaços físicos (tatames e ringues), instrutores habilitados e controle de lotação.
           </p>
         </div>
@@ -43,7 +46,8 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
         <button
           type="button"
           onClick={() => alert('Modal de criação de turma / alocação de horário!')}
-          className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition shadow-md shadow-amber-500/10 flex items-center justify-center gap-2 cursor-pointer"
+          style={{ backgroundColor: accentColor }}
+          className="px-5 py-2.5 text-white font-bold text-xs rounded-xl transition shadow-sm hover:opacity-90 flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Alocar Nova Turma</span>
@@ -51,17 +55,18 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
       </div>
 
       {/* Barra de Filtros (Espaço e Dia da Semana) */}
-      <div className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-4 shadow-sm">
         {/* Filtro por Dia */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          <span className="text-xs text-zinc-400 font-medium mr-1">Dia:</span>
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mr-1 whitespace-nowrap">Dia:</span>
           <button
             type="button"
             onClick={() => setSelectedDay('all')}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
+            style={selectedDay === 'all' ? { backgroundColor: accentColor, color: '#ffffff' } : {}}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
               selectedDay === 'all'
-                ? 'bg-amber-500 text-black'
-                : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                ? 'font-bold shadow-xs'
+                : 'bg-zinc-100 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
             }`}
           >
             Semana Toda
@@ -71,10 +76,11 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
               key={d}
               type="button"
               onClick={() => setSelectedDay(d)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer ${
+              style={selectedDay === d ? { backgroundColor: accentColor, color: '#ffffff' } : {}}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap ${
                 selectedDay === d
-                  ? 'bg-amber-500 text-black font-bold'
-                  : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                  ? 'font-bold shadow-xs'
+                  : 'bg-zinc-100 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
               }`}
             >
               {d}
@@ -83,28 +89,30 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
         </div>
 
         {/* Filtro por Espaço Físico */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          <span className="text-xs text-zinc-400 font-medium mr-1">Espaço:</span>
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mr-1 whitespace-nowrap">Espaço:</span>
           <button
             type="button"
             onClick={() => setSelectedSpace('all')}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
+            style={selectedSpace === 'all' ? { backgroundColor: accentColor, color: '#ffffff' } : {}}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
               selectedSpace === 'all'
-                ? 'bg-amber-500 text-black'
-                : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                ? 'font-bold shadow-xs'
+                : 'bg-zinc-100 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
             }`}
           >
-            Todos os Espaços
+            Todos
           </button>
           {spaces.map(s => (
             <button
               key={s}
               type="button"
               onClick={() => setSelectedSpace(s)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer ${
+              style={selectedSpace === s ? { backgroundColor: accentColor, color: '#ffffff' } : {}}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap ${
                 selectedSpace === s
-                  ? 'bg-amber-500 text-black font-bold'
-                  : 'bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800'
+                  ? 'font-bold shadow-xs'
+                  : 'bg-zinc-100 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
               }`}
             >
               {s}
@@ -116,7 +124,7 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
       {/* Grid de Cards das Turmas Alocadas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-zinc-500 text-sm bg-zinc-900/40 rounded-xl border border-zinc-800">
+          <div className="col-span-full py-12 text-center text-zinc-500 text-sm bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             Nenhuma turma encontrada para os critérios selecionados.
           </div>
         ) : (
@@ -127,29 +135,30 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
             return (
               <div
                 key={sch.id}
-                className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition flex flex-col justify-between"
+                className="p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition flex flex-col justify-between shadow-xs"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span
-                      className="text-[11px] font-mono px-2.5 py-1 rounded-full font-bold border"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full font-bold border"
                       style={{
                         backgroundColor: `${modality?.accentColor}15`,
                         color: modality?.accentColor,
                         borderColor: `${modality?.accentColor}40`
                       }}
                     >
+                      <MartialIcon modalityId={sch.modalityId} size={13} />
                       {modality?.name}
                     </span>
 
-                    <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                       {sch.dayOfWeek}
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-white text-base leading-snug">{sch.title}</h3>
+                  <h3 className="font-bold text-zinc-900 dark:text-white text-base leading-snug">{sch.title}</h3>
 
-                  <div className="space-y-2 mt-4 text-xs text-zinc-300">
+                  <div className="space-y-2 mt-4 text-xs text-zinc-600 dark:text-zinc-300">
                     <div className="flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                       <span>{sch.startTime} às {sch.endTime}</span>
@@ -157,7 +166,7 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
 
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                      <span className="font-semibold text-zinc-200">{sch.space}</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">{sch.space}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -168,7 +177,7 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
 
                   {sch.isGiCompatible !== undefined && (
                     <div className="mt-3">
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                         {sch.isGiCompatible ? 'Quimono Obrigatório (Gi)' : 'Roupa de Treino (No-Gi)'}
                       </span>
                     </div>
@@ -176,16 +185,16 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
                 </div>
 
                 {/* Barra de Ocupação e Vagas */}
-                <div className="mt-5 pt-4 border-t border-zinc-800">
+                <div className="mt-5 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                   <div className="flex justify-between text-xs font-mono mb-1.5">
-                    <span className="text-zinc-400">Ocupação:</span>
-                    <span className="text-white font-bold">
+                    <span className="text-zinc-500 dark:text-zinc-400">Ocupação:</span>
+                    <span className="text-zinc-900 dark:text-white font-bold">
                       {sch.enrolledCount} / {sch.capacity} vagas ({occupancyPct}%)
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
+                      className={`h-full rounded-full transition-all duration-500 ${
                         occupancyPct >= 80 ? 'bg-amber-500' : 'bg-emerald-500'
                       }`}
                       style={{ width: `${occupancyPct}%` }}
@@ -193,8 +202,8 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
                   </div>
 
                   {sch.openForTrial && (
-                    <p className="text-[11px] text-emerald-400 mt-2 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Vagas abertas para alunos experimentais
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1 font-medium">
+                      <CheckCircle2 className="w-3 h-3" /> Vagas para aula experimental
                     </p>
                   )}
                 </div>

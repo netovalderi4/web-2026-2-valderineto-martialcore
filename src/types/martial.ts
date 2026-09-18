@@ -5,10 +5,12 @@ export type UserRole = 'admin' | 'instructor' | 'student' | 'visitor';
 export interface ModalityMetadata {
   id: ModalityId;
   name: string;
+  shortName: string; // Ex: 'BJJ', 'Muay Thai', 'Karatê', 'Judô', 'Capoeira', 'Boxe'
   tagline: string;
   graduationType: 'faixas_graus' | 'cordeis' | 'kyu_dan' | 'gokyo' | 'cordoes_estilo' | 'tempo_pesagem';
   accentColor: string;
   iconName: string;
+  bannerImage?: string; // Caminho para o banner em /images/modalities/
   defaultTimeRequirementMonths: number;
   minClassesForPromotion: number;
   specificRules: string[];
@@ -91,9 +93,8 @@ export interface TechnicalEvaluation {
   instructorName: string;
   date: string;
   notes: string;
-  // Modalidade específica:
   bjjEvaluation?: {
-    guardPassing: number; // 1-10
+    guardPassing: number;
     submissions: number;
     escapes: number;
     recommendedDegree?: number;
@@ -111,13 +112,13 @@ export interface TechnicalEvaluation {
     kumiteScore: number;
   };
   judoEvaluation?: {
-    nageWazaMastered: string[]; // ex: ['Ippon Seoi Nage', 'Osoto Gari']
-    katameWazaMastered: string[]; // ex: ['Kesa Gatame', 'Juji Gatame']
+    nageWazaMastered: string[];
+    katameWazaMastered: string[];
     cbjStatus: 'ativo' | 'pendente';
   };
   capoeiraEvaluation?: {
     style: 'Regional' | 'Angola' | 'Contemporânea';
-    instrumentDominance: string[]; // ['Berimbau', 'Pandeiro', 'Atabaque']
+    instrumentDominance: string[];
     fundamentosScore: number;
     participatedInBatizado: boolean;
   };

@@ -13,10 +13,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'bjj',
     name: 'Brazilian Jiu-Jitsu',
+    shortName: 'BJJ',
     tagline: 'Faixas, Graus e Carência (Gi & No-Gi)',
     graduationType: 'faixas_graus',
-    accentColor: '#3b82f6',
+    accentColor: '#2563eb',
     iconName: 'Shield',
+    bannerImage: '/images/modalities/bjj_banner.jpg',
     defaultTimeRequirementMonths: 12,
     minClassesForPromotion: 80,
     specificRules: [
@@ -28,10 +30,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'muay_thai',
     name: 'Muay Thai',
+    shortName: 'Muay Thai',
     tagline: 'Cordéis (Prajied / Kruang) & Sparring',
     graduationType: 'cordeis',
     accentColor: '#ef4444',
     iconName: 'Flame',
+    bannerImage: '/images/modalities/muay_thai_banner.jpg',
     defaultTimeRequirementMonths: 6,
     minClassesForPromotion: 50,
     specificRules: [
@@ -43,10 +47,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'karate',
     name: 'Karatê',
+    shortName: 'Karatê',
     tagline: 'Kyu, Dan & Avaliação Kata / Kumite',
     graduationType: 'kyu_dan',
     accentColor: '#f59e0b',
     iconName: 'Swords',
+    bannerImage: '/images/modalities/karate_banner.jpg',
     defaultTimeRequirementMonths: 6,
     minClassesForPromotion: 60,
     specificRules: [
@@ -58,10 +64,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'judo',
     name: 'Judô',
+    shortName: 'Judô',
     tagline: 'Sistema Gokyo & Técnicas CBJ',
     graduationType: 'gokyo',
     accentColor: '#10b981',
     iconName: 'Zap',
+    bannerImage: '/images/modalities/judo_banner.jpg',
     defaultTimeRequirementMonths: 8,
     minClassesForPromotion: 70,
     specificRules: [
@@ -73,10 +81,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'capoeira',
     name: 'Capoeira',
+    shortName: 'Capoeira',
     tagline: 'Cordéis por Estilo & Batizados',
     graduationType: 'cordoes_estilo',
-    accentColor: '#eab308',
+    accentColor: '#f97316',
     iconName: 'Music',
+    bannerImage: '/images/modalities/capoeira_banner.jpg',
     defaultTimeRequirementMonths: 12,
     minClassesForPromotion: 60,
     specificRules: [
@@ -88,10 +98,12 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
   {
     id: 'boxing',
     name: 'Boxe',
+    shortName: 'Boxe',
     tagline: 'Categorias de Peso, Sparring & Minutagem',
     graduationType: 'tempo_pesagem',
     accentColor: '#8b5cf6',
     iconName: 'Dumbbell',
+    bannerImage: '/images/modalities/boxing_banner.jpg',
     defaultTimeRequirementMonths: 4,
     minClassesForPromotion: 40,
     specificRules: [

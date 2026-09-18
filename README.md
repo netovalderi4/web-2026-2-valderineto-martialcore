@@ -39,7 +39,7 @@ Sistema Web Modular para Gestão de Centros de Treinamento Multi-Modalidades de 
 
 ## 🥋 Estrutura de Telas e Perfis
 
-O sistema possui uma **Barra de Simulação de Perfis (Role Simulator)** no topo para facilitar a navegação e demonstração de cada perfil definido no RBAC:
+O sistema possui autenticação integrada e controle de acesso baseado em papéis (RBAC), permitindo vivenciar e demonstrar a experiência de cada perfil:
 
 - 👑 **Gestor / Administrador**:
   - Dashboard executivo com KPIs (faturamento, atletas ativos, ocupação de tatames, inadimplência)
@@ -55,8 +55,9 @@ O sistema possui uma **Barra de Simulação de Perfis (Role Simulator)** no topo
   - Meu Tatame: Termômetro de graduação visual com faixa e graus, controle de carência, presenças e mensalidades
 - 👥 **Visitante / Experimental**:
   - Consulta de grade de turmas abertas e agendamento gratuito de aula experimental
-- 🌐 **Página Institucional (Landing Page)**:
-  - Landing page com FAQ estruturado Schema.org e metadados de SEO para o Google Search Console
+- 🎨 **Motor de Atmosfera Dinâmica por Arte Marcial**:
+  - Personalização da aura e dos acentos visuais do sistema conforme a arte marcial selecionada (BJJ, Muay Thai, Karatê, Judô, Capoeira e Boxe).
+  - Tema Claro / Escuro com persistência local e design minimalista sem poluição visual.
 
 ---
 
