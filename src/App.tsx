@@ -38,6 +38,10 @@ function SystemContainer({
   onLogout
 }: SystemContainerProps) {
   const getInitialView = (role: UserRole) => {
+    if (typeof window !== 'undefined') {
+      const urlView = new URLSearchParams(window.location.search).get('view');
+      if (urlView) return urlView;
+    }
     switch (role) {
       case 'admin':
         return 'dashboard';
@@ -174,10 +178,22 @@ function SystemContainer({
 }
 
 export default function App() {
-  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>('all');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [currentRole, setCurrentRole] = useState<UserRole>('admin');
+  const getUrlParams = () => {
+    if (typeof window === 'undefined') return { modality: 'all' as const, isAuth: false, isModalOpen: false, role: 'admin' as const };
+    const params = new URLSearchParams(window.location.search);
+    const role = (params.get('role') as UserRole) || 'admin';
+    const hasRole = Boolean(params.get('role'));
+    const isAuth = hasRole || params.get('auth') === 'true';
+    const isModalOpen = params.get('modal') === 'auth' || params.get('auth') === 'open';
+    const modality = (params.get('modality') as ModalityId | 'all') || 'all';
+    return { modality, isAuth, isModalOpen, role };
+  };
+
+  const initialParams = getUrlParams();
+  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>(initialParams.modality);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialParams.isAuth);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(initialParams.isModalOpen);
+  const [currentRole, setCurrentRole] = useState<UserRole>(initialParams.role);
 
   const handleLogin = (role: UserRole) => {
     setCurrentRole(role);

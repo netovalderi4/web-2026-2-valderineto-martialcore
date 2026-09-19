@@ -13,6 +13,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
+      const urlTheme = new URLSearchParams(window.location.search).get('theme');
+      if (urlTheme === 'dark' || urlTheme === 'light') {
+        return urlTheme;
+      }
       const saved = localStorage.getItem('martialcore_theme');
       if (saved === 'dark' || saved === 'light') {
         return saved;

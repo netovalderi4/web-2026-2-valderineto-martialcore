@@ -17,6 +17,18 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuthModal }) => {
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const scrollTarget = new URLSearchParams(window.location.search).get('scroll');
+      if (scrollTarget) {
+        setTimeout(() => {
+          const el = document.getElementById(scrollTarget);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-950 transition-colors duration-200">
       {/* Header Institucional Preto e Branco */}
