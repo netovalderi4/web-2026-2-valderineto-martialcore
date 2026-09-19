@@ -1,30 +1,53 @@
+# React + TypeScript + Vite
 # MartialCore — Frontend Web
 
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 Sistema Web Modular para Gestão de Centros de Treinamento Multi-Modalidades de Artes Marciais (**Brazilian Jiu-Jitsu, Muay Thai, Karatê, Judô, Capoeira e Boxe**).
 
+Currently, two official plugins are available:
 - **Instituição:** UFERSA — Campus Pau dos Ferros
 - **Disciplina:** PAM0462 — Programação Web (2026.2)
 - **Aluno:** Valderi Alves de Souza Neto
 - **Deploy:** AWS Amplify com domínio oficial mascarado (`https://valderi.mestre.web.ufersa.dev.br/`)
 
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 ---
 
+## React Compiler
 ## 🚀 Tecnologias Utilizadas
 
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 - **React 19** + **TypeScript** (`verbatimModuleSyntax`)
 - **Vite 8**
 - **Tailwind CSS v4** (`@tailwindcss/vite`)
 - **Lucide React** (Ícones temáticos)
 
+## Expanding the Oxlint configuration
 ---
 
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
 ## 🛠️ Como Executar Localmente
 
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+```
 1. **Instalar dependências:**
    ```bash
    npm install
    ```
 
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
 2. **Rodar em ambiente de desenvolvimento:**
    ```bash
    npm run dev
@@ -39,6 +62,7 @@ Sistema Web Modular para Gestão de Centros de Treinamento Multi-Modalidades de 
 
 ## 🥋 Estrutura de Telas e Perfis
 
+O sistema possui uma **Barra de Simulação de Perfis (Role Simulator)** no topo para facilitar a navegação e demonstração de cada perfil definido no RBAC:
 O sistema possui autenticação integrada e controle de acesso baseado em papéis (RBAC), permitindo vivenciar e demonstrar a experiência de cada perfil:
 
 - 👑 **Gestor / Administrador**:

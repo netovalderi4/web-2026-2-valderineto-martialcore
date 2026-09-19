@@ -118,10 +118,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             type="button"
             onClick={() => onNavigateTab('students')}
-            className="px-5 py-2.5 text-white font-bold text-xs rounded-2xl transition-all duration-300 shadow-sm hover:brightness-110 flex items-center gap-2 cursor-pointer"
+            className={`px-5 py-2.5 font-bold text-xs rounded-2xl transition-all duration-300 shadow-sm hover:brightness-110 flex items-center gap-2 cursor-pointer ${
+              selectedModality === 'all'
+                ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-zinc-950/10 dark:shadow-white/5'
+                : 'text-white'
+            }`}
             style={{
-              backgroundColor: accentColor,
-              boxShadow: `0 4px 14px -2px ${accentColor}40`
+              backgroundColor: selectedModality !== 'all' ? accentColor : undefined,
+              boxShadow: selectedModality !== 'all' ? `0 4px 14px -2px ${accentColor}40` : undefined
             }}
           >
             <UserPlus className="w-4 h-4" />
@@ -135,17 +139,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div
           className="p-5 rounded-3xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-xs"
           style={{
-            backgroundColor: `${accentColor}0a`,
-            borderColor: `${accentColor}25`
+            backgroundColor: selectedModality !== 'all' ? `${accentColor}0a` : undefined,
+            borderColor: selectedModality !== 'all' ? `${accentColor}25` : undefined
           }}
         >
           <div className="flex items-center gap-3.5">
             <div
               className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border"
               style={{
-                backgroundColor: `${accentColor}18`,
-                borderColor: `${accentColor}30`,
-                color: accentColor
+                backgroundColor: selectedModality !== 'all' ? `${accentColor}18` : undefined,
+                borderColor: selectedModality !== 'all' ? `${accentColor}30` : undefined,
+                color: selectedModality !== 'all' ? accentColor : undefined
               }}
             >
               <Award className="w-5 h-5" />
@@ -164,22 +168,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             type="button"
             onClick={() => onNavigateTab('eligible')}
             className="text-xs font-bold hover:underline flex items-center gap-1 shrink-0 cursor-pointer self-start sm:self-auto"
-            style={{ color: accentColor }}
+            style={{ color: selectedModality !== 'all' ? accentColor : undefined }}
           >
             Convocar Alunos <ArrowUpRight className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Grid de KPIs principais (Reativo ao filtro ativo) */}
+      {/* Grid de KPIs principais (Reativo ao filtro ativo: P&B em 'all' ou Cor da Arte selecionada) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Atletas Ativos na Arte/Total */}
-        <div className="p-6 bg-white dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800/70 rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        <div
+          className="p-6 bg-white dark:bg-zinc-900/60 border rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700"
+          style={{
+            borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined
+          }}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
               {selectedModality === 'all' ? 'Atletas Matriculados' : `Atletas de ${activeModalityMeta?.shortName}`}
             </span>
-            <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+            <div
+              className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all"
+              style={{
+                backgroundColor: selectedModality !== 'all' ? `${accentColor}18` : undefined,
+                borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined,
+                color: selectedModality !== 'all' ? accentColor : undefined
+              }}
+            >
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -192,12 +208,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Faturamento Filtrado */}
-        <div className="p-6 bg-white dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800/70 rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        <div
+          className="p-6 bg-white dark:bg-zinc-900/60 border rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700"
+          style={{
+            borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined
+          }}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
               {selectedModality === 'all' ? 'Receita Liquidada' : `Receita (${activeModalityMeta?.shortName})`}
             </span>
-            <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+            <div
+              className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all"
+              style={{
+                backgroundColor: selectedModality !== 'all' ? `${accentColor}18` : undefined,
+                borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined,
+                color: selectedModality !== 'all' ? accentColor : undefined
+              }}
+            >
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
@@ -210,10 +238,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Inadimplência na Modalidade */}
-        <div className="p-6 bg-white dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800/70 rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        <div
+          className="p-6 bg-white dark:bg-zinc-900/60 border rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700"
+          style={{
+            borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined
+          }}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Inadimplência</span>
-            <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+            <div
+              className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all"
+              style={{
+                backgroundColor: selectedModality !== 'all' ? `${accentColor}18` : undefined,
+                borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined,
+                color: selectedModality !== 'all' ? accentColor : undefined
+              }}
+            >
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
@@ -226,10 +266,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Grade de Aulas da Modalidade */}
-        <div className="p-6 bg-white dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800/70 rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        <div
+          className="p-6 bg-white dark:bg-zinc-900/60 border rounded-3xl shadow-xs transition-all hover:border-zinc-300 dark:hover:border-zinc-700"
+          style={{
+            borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined
+          }}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Turmas Ativas</span>
-            <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+            <div
+              className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all"
+              style={{
+                backgroundColor: selectedModality !== 'all' ? `${accentColor}18` : undefined,
+                borderColor: selectedModality !== 'all' ? `${accentColor}35` : undefined,
+                color: selectedModality !== 'all' ? accentColor : undefined
+              }}
+            >
               <Clock className="w-4 h-4" />
             </div>
           </div>

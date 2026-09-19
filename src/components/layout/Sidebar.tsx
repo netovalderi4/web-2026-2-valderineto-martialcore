@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onLogout
 }) => {
-  const { accentColor } = useMartialTheme();
+  const { accentColor, isMonochrome } = useMartialTheme();
 
   const getNavItems = () => {
     switch (currentRole) {
@@ -59,9 +59,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ];
       case 'student':
         return [
-          { id: 'progress', label: 'Meu Tatame & Faixas', icon: Trophy },
-          { id: 'schedules', label: 'Minhas Aulas', icon: CalendarDays },
-          { id: 'invoices', label: 'Minhas Mensalidades', icon: DollarSign }
+          { id: 'progress', label: 'Meu Tatame', icon: Trophy },
+          { id: 'schedules', label: 'Grade de Horários', icon: CalendarDays },
+          { id: 'invoices', label: 'Minhas Faturas', icon: DollarSign }
         ];
       case 'visitor':
       default:
@@ -113,12 +113,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleItemClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer group ${
                     isActive
-                      ? 'text-white shadow-xs'
+                      ? isMonochrome
+                        ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-bold'
+                        : 'text-white shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-zinc-900/80'
                   }`}
                   style={{
-                    backgroundColor: isActive ? accentColor : undefined,
-                    boxShadow: isActive ? `0 2px 10px -2px ${accentColor}50` : undefined
+                    backgroundColor: isActive && !isMonochrome ? accentColor : undefined,
+                    boxShadow: isActive && !isMonochrome ? `0 2px 10px -2px ${accentColor}50` : undefined
                   }}
                 >
                   <div className="flex items-center gap-3">

@@ -19,6 +19,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#2563eb',
     iconName: 'Shield',
     bannerImage: '/images/modalities/bjj_banner.jpg',
+    heroImage: '/images/modalities/bjj_hero_4x1.jpg',
     defaultTimeRequirementMonths: 12,
     minClassesForPromotion: 80,
     specificRules: [
@@ -36,6 +37,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#ef4444',
     iconName: 'Flame',
     bannerImage: '/images/modalities/muay_thai_banner.jpg',
+    heroImage: '/images/modalities/muay_thai_hero_4x1.jpg',
     defaultTimeRequirementMonths: 6,
     minClassesForPromotion: 50,
     specificRules: [
@@ -53,6 +55,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#f59e0b',
     iconName: 'Swords',
     bannerImage: '/images/modalities/karate_banner.jpg',
+    heroImage: '/images/modalities/karate_hero_4x1.jpg',
     defaultTimeRequirementMonths: 6,
     minClassesForPromotion: 60,
     specificRules: [
@@ -70,6 +73,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#10b981',
     iconName: 'Zap',
     bannerImage: '/images/modalities/judo_banner.jpg',
+    heroImage: '/images/modalities/judo_hero_4x1.jpg',
     defaultTimeRequirementMonths: 8,
     minClassesForPromotion: 70,
     specificRules: [
@@ -87,6 +91,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#f97316',
     iconName: 'Music',
     bannerImage: '/images/modalities/capoeira_banner.jpg',
+    heroImage: '/images/modalities/capoeira_hero_4x1.jpg',
     defaultTimeRequirementMonths: 12,
     minClassesForPromotion: 60,
     specificRules: [
@@ -104,6 +109,7 @@ export const MODALITIES_DATA: ModalityMetadata[] = [
     accentColor: '#8b5cf6',
     iconName: 'Dumbbell',
     bannerImage: '/images/modalities/boxing_banner.jpg',
+    heroImage: '/images/modalities/boxing_hero_4x1.jpg',
     defaultTimeRequirementMonths: 4,
     minClassesForPromotion: 40,
     specificRules: [

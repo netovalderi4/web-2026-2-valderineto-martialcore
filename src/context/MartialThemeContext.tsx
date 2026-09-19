@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import type { ModalityId, ModalityMetadata } from '../types/martial';
 import { MODALITIES_DATA } from '../mock/martialData';
 
@@ -7,6 +7,7 @@ interface MartialThemeContextType {
   setSelectedModality: (modality: ModalityId | 'all') => void;
   currentModality?: ModalityMetadata;
   accentColor: string;
+  isMonochrome: boolean;
 }
 
 const MartialThemeContext = createContext<MartialThemeContextType | undefined>(undefined);
@@ -20,8 +21,24 @@ export const MartialThemeProvider: React.FC<{
     ? MODALITIES_DATA.find(m => m.id === selectedModality)
     : undefined;
 
-  // Default elegant gold/amber for 'all', or the exact color of the selected modality
-  const accentColor = currentModality ? currentModality.accentColor : '#f59e0b';
+  const isMonochrome = selectedModality === 'all';
+
+  // Padrão Preto e Branco quando em 'all' (Artes Mistas), ou a cor exata da modalidade selecionada
+  const accentColor = currentModality ? currentModality.accentColor : '#18181b';
+
+  // Injeção de variáveis CSS globais no :root
+  useEffect(() => {
+    const root = document.documentElement;
+    if (currentModality) {
+      root.style.setProperty('--martial-accent', currentModality.accentColor);
+      root.style.setProperty('--martial-accent-glow', `${currentModality.accentColor}33`);
+      root.style.setProperty('--martial-accent-subtle', `${currentModality.accentColor}15`);
+    } else {
+      root.style.removeProperty('--martial-accent');
+      root.style.removeProperty('--martial-accent-glow');
+      root.style.removeProperty('--martial-accent-subtle');
+    }
+  }, [currentModality]);
 
   return (
     <MartialThemeContext.Provider
@@ -29,7 +46,8 @@ export const MartialThemeProvider: React.FC<{
         selectedModality,
         setSelectedModality,
         currentModality,
-        accentColor
+        accentColor,
+        isMonochrome
       }}
     >
       {children}

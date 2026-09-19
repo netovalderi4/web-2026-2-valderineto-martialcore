@@ -10,7 +10,8 @@ export interface ModalityMetadata {
   graduationType: 'faixas_graus' | 'cordeis' | 'kyu_dan' | 'gokyo' | 'cordoes_estilo' | 'tempo_pesagem';
   accentColor: string;
   iconName: string;
-  bannerImage?: string; // Caminho para o banner em /images/modalities/
+  bannerImage?: string; // Caminho para o banner em /images/modalities/ da vitrine
+  heroImage?: string; // Caminho para a imagem widescreen 16:9 preenchendo o banner interno do sistema
   defaultTimeRequirementMonths: number;
   minClassesForPromotion: number;
   specificRules: string[];

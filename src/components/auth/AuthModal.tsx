@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { UserRole } from '../../types/martial';
+import { MartialCoreLogo } from '../ui/MartialCoreLogo';
 import {
   Shield,
   Award,
@@ -45,9 +46,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       roleTitle: 'Administrador / Gestor do CT',
       description: 'Acesso total: dashboard financeiro, alocação de tatames e cadastro de atletas.',
       icon: <Shield className="w-5 h-5" />,
-      accentBg: 'bg-amber-500/10 dark:bg-amber-500/15',
-      borderAccent: 'border-amber-500/30 hover:border-amber-500',
-      color: '#f59e0b'
+      accentBg: 'bg-zinc-100 dark:bg-zinc-800/80',
+      borderAccent: 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-white',
+      color: '#71717a'
     },
     {
       role: 'instructor',
@@ -62,8 +63,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     {
       role: 'student',
       name: 'Lucas Mendonça',
-      roleTitle: 'Atleta / Aluno Matriculado',
-      description: 'Portal Meu Tatame, termômetro de faixa, carência e faturas.',
+      roleTitle: 'Atleta / Aluno Ativo',
+      description: 'Meu tatame, termômetro de faixa, carência e faturas em aberto.',
       icon: <User className="w-5 h-5" />,
       accentBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
       borderAccent: 'border-emerald-500/30 hover:border-emerald-500',
@@ -71,9 +72,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     },
     {
       role: 'visitor',
-      name: 'Visitante Iniciante',
-      roleTitle: 'Visitante / Aula Experimental',
-      description: 'Grade aberta e agendamento gratuito de primeira aula no tatame.',
+      name: 'Visitante / Candidato',
+      roleTitle: 'Visitante (Experimental)',
+      description: 'Grade de aulas abertas e agendamento gratuito de aula experimental.',
       icon: <Users className="w-5 h-5" />,
       accentBg: 'bg-purple-500/10 dark:bg-purple-500/15',
       borderAccent: 'border-purple-500/30 hover:border-purple-500',
@@ -83,14 +84,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Default to admin for custom login test
     onLogin('admin');
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-6">
-        {/* Fechar */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fadeIn">
+      <div className="relative w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 sm:p-8 space-y-6">
+        {/* Botão Fechar */}
         <button
           type="button"
           onClick={onClose}
@@ -101,17 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Topo Modal */}
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-500 text-black rounded-xl font-black text-base shadow-sm">
-            MC
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">
-              Acessar MartialCore
-            </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Escolha seu perfil ou insira suas credenciais para entrar no sistema.
-            </p>
-          </div>
+          <MartialCoreLogo size="md" isMonochrome={true} />
         </div>
 
         {/* Abas: Acesso Rápido vs Credenciais */}
@@ -215,14 +205,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full py-3 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-zinc-950 font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               <LogIn className="w-4 h-4" />
               <span>Entrar no Cockpit</span>

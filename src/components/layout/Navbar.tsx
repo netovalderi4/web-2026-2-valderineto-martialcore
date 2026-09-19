@@ -3,6 +3,7 @@ import type { ModalityId, UserRole } from '../../types/martial';
 import { MODALITIES_DATA } from '../../mock/martialData';
 import { MartialIcon } from '../martial/MartialIcon';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { MartialCoreLogo } from '../ui/MartialCoreLogo';
 import { Bell, UserCircle2, Menu, LogOut } from 'lucide-react';
 
 interface NavbarProps {
@@ -20,6 +21,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMobileMenu,
   onLogout
 }) => {
+  const currentModality = MODALITIES_DATA.find(m => m.id === selectedModality);
+
   const roleNames: Record<UserRole, { title: string; subtitle: string; badgeColor: string }> = {
     admin: {
       title: 'Valderi Gestor',
@@ -46,7 +49,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const user = roleNames[currentRole];
 
   return (
-    <header className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur border-b border-zinc-200/70 dark:border-zinc-800/70 sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between gap-4 transition-colors duration-200">
+    <header
+      className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur border-b border-zinc-200/70 dark:border-zinc-800/70 sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between gap-4 transition-all duration-300"
+      style={{
+        borderTopColor: currentModality ? currentModality.accentColor : undefined,
+        borderTopWidth: currentModality ? '2px' : '0px'
+      }}
+    >
       {/* Esquerda: Menu Mobile e Logo do CT */}
       <div className="flex items-center gap-3 shrink-0">
         {onOpenMobileMenu && (
@@ -64,19 +73,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           type="button"
           onClick={() => onSelectModality('all')}
           className="flex items-center gap-2.5 text-left group cursor-pointer"
-          title="Ver visão unificada do centro de treinamento"
+          title="Ver visão unificada do centro de treinamento (Preto e Branco)"
         >
-          <span className="p-1.5 bg-amber-500 text-black rounded-xl font-black text-sm leading-none group-hover:scale-105 transition shadow-xs">
-            MC
-          </span>
-          <div className="hidden sm:block">
-            <span className="text-base font-black tracking-wider text-zinc-900 dark:text-white">
-              MARTIAL<span className="text-amber-500">CORE</span>
-            </span>
-            <span className="text-[10px] block text-zinc-500 dark:text-zinc-400 -mt-1 font-mono uppercase tracking-wider">
-              Centro de Lutas
-            </span>
-          </div>
+          <MartialCoreLogo
+            size="sm"
+            accentColor={currentModality?.accentColor}
+            isMonochrome={selectedModality === 'all'}
+          />
         </button>
       </div>
 
@@ -138,7 +141,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="3 Alunos aptos para graduação"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-zinc-950 animate-pulse" />
+            <span
+              className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white dark:ring-zinc-950 animate-pulse ${
+                selectedModality === 'all' ? 'bg-zinc-950 dark:bg-white' : ''
+              }`}
+              style={{
+                backgroundColor: selectedModality !== 'all' && currentModality ? currentModality.accentColor : undefined
+              }}
+            />
           </button>
         </div>
 
