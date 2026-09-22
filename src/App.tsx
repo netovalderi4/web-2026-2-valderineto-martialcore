@@ -73,7 +73,12 @@ function SystemContainer({
         case 'students':
           return <StudentsManagement selectedModality={selectedModality} />;
         case 'schedules':
-          return <SchedulesManagement selectedModality={selectedModality} />;
+          return (
+            <SchedulesManagement
+              selectedModality={selectedModality}
+              currentRole={currentRole}
+            />
+          );
         case 'finance':
           return <FinanceManagement selectedModality={selectedModality} />;
         case 'modalities':
@@ -106,9 +111,15 @@ function SystemContainer({
         case 'progress':
           return <StudentPortal selectedModality={selectedModality} />;
         case 'schedules':
-          return <SchedulesManagement selectedModality={selectedModality} />;
+          return (
+            <SchedulesManagement
+              selectedModality={selectedModality}
+              currentRole={currentRole}
+            />
+          );
         case 'invoices':
-          return <FinanceManagement selectedModality={selectedModality} />;
+          // Blindagem RBAC: O aluno visualiza exclusivamente suas próprias faturas no Portal do Aluno
+          return <StudentPortal selectedModality={selectedModality} />;
         default:
           return <StudentPortal selectedModality={selectedModality} />;
       }

@@ -3,11 +3,13 @@ import type { ModalityId } from '../../types/martial';
 import { SCHEDULES_DATA, MODALITIES_DATA } from '../../mock/martialData';
 import { MartialIcon } from '../../components/martial/MartialIcon';
 import { useMartialTheme } from '../../context/MartialThemeContext';
+import { sanitizeInput, validatePhone, validateEmail, formatPhone } from '../../utils/security';
 import {
   Calendar,
   CheckCircle2,
   Sparkles,
-  Send
+  Send,
+  AlertCircle
 } from 'lucide-react';
 
 interface TrialClassBookingProps {
@@ -21,6 +23,7 @@ export const TrialClassBooking: React.FC<TrialClassBookingProps> = ({ selectedMo
   const [email, setEmail] = useState('');
   const [chosenClassId, setChosenClassId] = useState(SCHEDULES_DATA[0].id);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const trialClasses = SCHEDULES_DATA.filter(
     s => s.openForTrial && (selectedModality === 'all' || s.modalityId === selectedModality)
@@ -28,10 +31,21 @@ export const TrialClassBooking: React.FC<TrialClassBookingProps> = ({ selectedMo
 
   const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !whatsapp) {
-      alert('Por favor, preencha seu nome e WhatsApp!');
+    const cleanName = sanitizeInput(fullName);
+    if (!cleanName || cleanName.length < 3) {
+      setFormError('Por favor, informe seu nome completo (mínimo 3 letras).');
       return;
     }
+    if (!validatePhone(whatsapp)) {
+      setFormError('Por favor, informe um WhatsApp válido com DDD (ex: (84) 99999-8888).');
+      return;
+    }
+    if (email.trim() && !validateEmail(email)) {
+      setFormError('Por favor, informe um e-mail com formato válido.');
+      return;
+    }
+
+    setFormError(null);
     setIsSuccess(true);
   };
 
@@ -68,13 +82,23 @@ export const TrialClassBooking: React.FC<TrialClassBookingProps> = ({ selectedMo
           </p>
 
           <form onSubmit={handleBooking} className="space-y-3 text-xs">
+            {formError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
+
             <div>
               <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Seu Nome Completo</label>
               <input
                 type="text"
                 placeholder="Ex: João Victor Souza"
                 value={fullName}
-                onChange={e => setFullName(e.target.value)}
+                onChange={e => {
+                  setFullName(e.target.value);
+                  if (formError) setFormError(null);
+                }}
                 className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
                 required
               />
@@ -86,8 +110,11 @@ export const TrialClassBooking: React.FC<TrialClassBookingProps> = ({ selectedMo
                 type="text"
                 placeholder="(84) 99999-8888"
                 value={whatsapp}
-                onChange={e => setWhatsapp(e.target.value)}
-                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                onChange={e => {
+                  setWhatsapp(formatPhone(e.target.value));
+                  if (formError) setFormError(null);
+                }}
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono"
                 required
               />
             </div>

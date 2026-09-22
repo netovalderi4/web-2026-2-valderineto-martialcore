@@ -1,29 +1,97 @@
 import React, { useState } from 'react';
-import type { ModalityId } from '../../types/martial';
-import { SCHEDULES_DATA, MODALITIES_DATA } from '../../mock/martialData';
+import type { ModalityId, ClassSchedule, UserRole } from '../../types/martial';
+import { SCHEDULES_DATA, MODALITIES_DATA, INSTRUCTORS_DATA } from '../../mock/martialData';
 import { MartialIcon } from '../../components/martial/MartialIcon';
 import { useMartialTheme } from '../../context/MartialThemeContext';
+import { sanitizeInput } from '../../utils/security';
 import {
   Clock,
   MapPin,
   Users,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  X,
+  AlertCircle
 } from 'lucide-react';
 
 interface SchedulesManagementProps {
   selectedModality: ModalityId | 'all';
+  currentRole?: UserRole;
 }
 
-export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ selectedModality }) => {
+export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({
+  selectedModality,
+  currentRole = 'admin'
+}) => {
   const { accentColor } = useMartialTheme();
+  const [schedulesList, setSchedulesList] = useState<ClassSchedule[]>(SCHEDULES_DATA);
   const [selectedDay, setSelectedDay] = useState<string>('all');
   const [selectedSpace, setSelectedSpace] = useState<string>('all');
+
+  // Modal de Nova Turma
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Form states
+  const [newTitle, setNewTitle] = useState('');
+  const [newModalityId, setNewModalityId] = useState<ModalityId>('bjj');
+  const [newInstructorName, setNewInstructorName] = useState(INSTRUCTORS_DATA[0].name);
+  const [newDay, setNewDay] = useState<'Segunda' | 'Terça' | 'Quarta' | 'Quinta' | 'Sexta' | 'Sábado'>('Segunda');
+  const [newStartTime, setNewStartTime] = useState('18:00');
+  const [newEndTime, setNewEndTime] = useState('19:30');
+  const [newSpace, setNewSpace] = useState<'Tatame 1' | 'Tatame 2' | 'Ringue de Luta' | 'Octógono'>('Tatame 1');
+  const [newCapacity, setNewCapacity] = useState('20');
+  const [newOpenForTrial, setNewOpenForTrial] = useState(true);
+  const [newIsGiCompatible, setNewIsGiCompatible] = useState(true);
 
   const spaces = ['Tatame 1', 'Tatame 2', 'Ringue de Luta', 'Octógono'];
   const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-  const filtered = SCHEDULES_DATA.filter(sch => {
+  const handleCreateSchedule = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanTitle = sanitizeInput(newTitle);
+    if (!cleanTitle || cleanTitle.length < 3) {
+      setFormError('Por favor, informe um título descritivo para a turma (mínimo 3 letras).');
+      return;
+    }
+    const capNum = parseInt(newCapacity, 10);
+    if (isNaN(capNum) || capNum < 1 || capNum > 100) {
+      setFormError('A capacidade de alunos por turma deve ser entre 1 e 100.');
+      return;
+    }
+    if (!newStartTime || !newEndTime) {
+      setFormError('Por favor, preencha o horário de início e término.');
+      return;
+    }
+    if (newStartTime >= newEndTime) {
+      setFormError('O horário de término deve ser posterior ao horário de início.');
+      return;
+    }
+
+    setFormError(null);
+    const newClass: ClassSchedule = {
+      id: `sch_${Date.now()}`,
+      modalityId: newModalityId,
+      title: cleanTitle,
+      instructorId: INSTRUCTORS_DATA.find(i => i.name === newInstructorName)?.id || 'inst-1',
+      instructorName: newInstructorName,
+      dayOfWeek: newDay,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      space: newSpace,
+      capacity: capNum,
+      enrolledCount: 1,
+      isGiCompatible: newModalityId === 'bjj' ? newIsGiCompatible : undefined,
+      openForTrial: newOpenForTrial
+    };
+
+    setSchedulesList(prev => [newClass, ...prev]);
+    setIsModalOpen(false);
+    setNewTitle('');
+    alert(`Turma "${newClass.title}" alocada com sucesso no ${newClass.space}!`);
+  };
+
+  const filtered = schedulesList.filter(sch => {
     const matchModality = selectedModality === 'all' || sch.modalityId === selectedModality;
     const matchDay = selectedDay === 'all' || sch.dayOfWeek === selectedDay;
     const matchSpace = selectedSpace === 'all' || sch.space === selectedSpace;
@@ -43,15 +111,21 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => alert('Modal de criação de turma / alocação de horário!')}
-          style={{ backgroundColor: accentColor }}
-          className="px-5 py-2.5 text-white font-bold text-xs rounded-xl transition shadow-sm hover:opacity-90 flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Alocar Nova Turma</span>
-        </button>
+        {/* RBAC: Apenas Gestor/Admin tem permissão para alocar turmas */}
+        {currentRole === 'admin' && (
+          <button
+            type="button"
+            onClick={() => {
+              setFormError(null);
+              setIsModalOpen(true);
+            }}
+            style={{ backgroundColor: accentColor }}
+            className="px-5 py-2.5 text-white font-bold text-xs rounded-xl transition shadow-sm hover:opacity-90 flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Alocar Nova Turma</span>
+          </button>
+        )}
       </div>
 
       {/* Barra de Filtros (Espaço e Dia da Semana) */}
@@ -212,6 +286,181 @@ export const SchedulesManagement: React.FC<SchedulesManagementProps> = ({ select
           })
         )}
       </div>
+
+      {/* Modal: Alocar Nova Turma / Horário */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg p-6 sm:p-7 relative shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1">
+              Alocar Nova Turma no Centro
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-5">
+              Defina o espaço físico, horários e instrutor habilitado para o tatame ou ringue.
+            </p>
+
+            <form onSubmit={handleCreateSchedule} className="space-y-4 text-xs">
+              {formError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                  Título da Turma <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Karatê Kata & Kumite Avançado"
+                  value={newTitle}
+                  onChange={e => setNewTitle(e.target.value)}
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Modalidade</label>
+                  <select
+                    value={newModalityId}
+                    onChange={e => setNewModalityId(e.target.value as ModalityId)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {MODALITIES_DATA.map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Espaço Físico</label>
+                  <select
+                    value={newSpace}
+                    onChange={e => setNewSpace(e.target.value as any)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {spaces.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Dia da Semana</label>
+                  <select
+                    value={newDay}
+                    onChange={e => setNewDay(e.target.value as any)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {days.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Início</label>
+                  <input
+                    type="time"
+                    required
+                    value={newStartTime}
+                    onChange={e => setNewStartTime(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Término</label>
+                  <input
+                    type="time"
+                    required
+                    value={newEndTime}
+                    onChange={e => setNewEndTime(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Instrutor Habilitado</label>
+                  <select
+                    value={newInstructorName}
+                    onChange={e => setNewInstructorName(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {INSTRUCTORS_DATA.map(i => (
+                      <option key={i.id} value={i.name}>{i.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Capacidade (Vagas)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    value={newCapacity}
+                    onChange={e => setNewCapacity(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-5 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newOpenForTrial}
+                    onChange={e => setNewOpenForTrial(e.target.checked)}
+                    className="rounded border-zinc-300 text-amber-500 focus:ring-amber-500"
+                  />
+                  <span className="text-zinc-700 dark:text-zinc-300">Abrir para Aula Experimental</span>
+                </label>
+
+                {newModalityId === 'bjj' && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newIsGiCompatible}
+                      onChange={e => setNewIsGiCompatible(e.target.checked)}
+                      className="rounded border-zinc-300 text-amber-500 focus:ring-amber-500"
+                    />
+                    <span className="text-zinc-700 dark:text-zinc-300">Quimono Obrigatório (Gi)</span>
+                  </label>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl font-semibold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{ backgroundColor: accentColor }}
+                  className="px-5 py-2 text-white font-bold rounded-xl shadow-xs hover:opacity-90 transition cursor-pointer"
+                >
+                  Alocar Turma
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -25,13 +25,81 @@ interface StudentsManagementProps {
 
 export const StudentsManagement: React.FC<StudentsManagementProps> = ({ selectedModality }) => {
   const { accentColor } = useMartialTheme();
+  const [studentsList, setStudentsList] = useState<Student[]>(STUDENTS_DATA);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'adimplente' | 'pendente' | 'atrasado'>('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Filtragem
-  const filteredStudents = STUDENTS_DATA.filter(student => {
+  // Form states para o modal de cadastro de novo atleta
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentEmail, setNewStudentEmail] = useState('');
+  const [newStudentPhone, setNewStudentPhone] = useState('');
+  const [newStudentBirthDate, setNewStudentBirthDate] = useState('2000-01-01');
+  const [newStudentWeight, setNewStudentWeight] = useState('75.0');
+  const [newStudentModality, setNewStudentModality] = useState<ModalityId>('bjj');
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Validação em JavaScript do formulário de matrícula
+  const handleCreateStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStudentName.trim() || newStudentName.trim().length < 3) {
+      setFormError('Por favor, informe o nome completo do atleta (mínimo 3 letras).');
+      return;
+    }
+    if (!newStudentEmail.trim() || !newStudentEmail.includes('@') || !newStudentEmail.includes('.')) {
+      setFormError('Por favor, informe um endereço de e-mail válido.');
+      return;
+    }
+    if (!newStudentPhone.trim() || newStudentPhone.trim().length < 8) {
+      setFormError('Por favor, informe o WhatsApp ou telefone para contato (com DDD).');
+      return;
+    }
+    const weightNum = parseFloat(newStudentWeight);
+    if (isNaN(weightNum) || weightNum <= 0) {
+      setFormError('Por favor, informe um peso corporal válido em kg.');
+      return;
+    }
+
+    setFormError(null);
+    const newStudent: Student = {
+      id: `std_${Date.now()}`,
+      name: newStudentName.trim(),
+      email: newStudentEmail.trim(),
+      phone: newStudentPhone.trim(),
+      birthDate: newStudentBirthDate,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+      enrollmentDate: new Date().toISOString().split('T')[0],
+      paymentStatus: 'adimplente',
+      activePlanId: 'p1',
+      currentWeightKg: weightNum,
+      weightCategory: weightNum <= 70 ? 'Peso Leve' : weightNum <= 85 ? 'Peso Médio' : 'Peso Pesado',
+      emergencyContact: 'Responsável - ' + newStudentPhone,
+      modalities: [
+        {
+          modalityId: newStudentModality,
+          currentRank: newStudentModality === 'bjj' ? 'Faixa Branca' : newStudentModality === 'muay_thai' ? 'Pha-biat Branco' : newStudentModality === 'karate' ? 'Faixa Branca' : 'Graduação Inicial',
+          degrees: 0,
+          lastExamDate: new Date().toISOString().split('T')[0],
+          classesAttendedInCurrentRank: 1,
+          classesRequired: 40,
+          monthsInCurrentRank: 0,
+          monthsRequired: 6,
+          isReadyForPromotion: false
+        }
+      ]
+    };
+
+    setStudentsList(prev => [newStudent, ...prev]);
+    setIsAddModalOpen(false);
+    setNewStudentName('');
+    setNewStudentEmail('');
+    setNewStudentPhone('');
+    alert(`Atleta "${newStudent.name}" matriculado com sucesso no sistema!`);
+  };
+
+  // Filtragem dinâmica de atletas
+  const filteredStudents = studentsList.filter(student => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -469,86 +537,117 @@ export const StudentsManagement: React.FC<StudentsManagementProps> = ({ selected
               Insira os dados cadastrais. O atleta será salvo no núcleo relacional compartilhado.
             </p>
 
-            <div className="space-y-3.5 text-xs">
-              <div>
-                <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Nome Completo</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Pedro Henrique Silva"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">E-mail</label>
-                  <input
-                    type="email"
-                    placeholder="pedro@email.com"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
-                  />
+            <form onSubmit={handleCreateStudent}>
+              {formError && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{formError}</span>
                 </div>
+              )}
+
+              <div className="space-y-3.5 text-xs">
                 <div>
-                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">WhatsApp / Telefone</label>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                    Nome Completo <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    placeholder="(84) 99999-0000"
+                    required
+                    placeholder="Ex: Pedro Henrique Silva"
+                    value={newStudentName}
+                    onChange={e => setNewStudentName(e.target.value)}
                     className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                      E-mail <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="pedro@email.com"
+                      value={newStudentEmail}
+                      onChange={e => setNewStudentEmail(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                      WhatsApp / Telefone <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="(84) 99999-0000"
+                      value={newStudentPhone}
+                      onChange={e => setNewStudentPhone(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Data de Nascimento</label>
+                    <input
+                      type="date"
+                      value={newStudentBirthDate}
+                      onChange={e => setNewStudentBirthDate(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Peso Atual (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="75.0"
+                      value={newStudentWeight}
+                      onChange={e => setNewStudentWeight(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Data de Nascimento</label>
-                  <input
-                    type="date"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Peso Atual (kg)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="75.0"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
-                  />
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Modalidade Inicial</label>
+                  <select
+                    value={newStudentModality}
+                    onChange={e => setNewStudentModality(e.target.value as ModalityId)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {MODALITIES_DATA.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Modalidade Inicial</label>
-                <select className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500">
-                  {MODALITIES_DATA.map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormError(null);
+                    setIsAddModalOpen(false);
+                  }}
+                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{ backgroundColor: accentColor }}
+                  className="px-5 py-2 text-white font-bold rounded-xl text-xs shadow-xs hover:opacity-90 transition cursor-pointer"
+                >
+                  Salvar Matrícula
+                </button>
               </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-semibold cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  alert('Atleta cadastrado no núcleo com sucesso!');
-                  setIsAddModalOpen(false);
-                }}
-                style={{ backgroundColor: accentColor }}
-                className="px-5 py-2 text-white font-bold rounded-xl text-xs shadow-xs hover:opacity-90 transition cursor-pointer"
-              >
-                Salvar Matrícula
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

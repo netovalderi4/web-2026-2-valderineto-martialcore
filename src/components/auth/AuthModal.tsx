@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { UserRole } from '../../types/martial';
 import { MartialCoreLogo } from '../ui/MartialCoreLogo';
+import { validateEmail, sanitizeInput } from '../../utils/security';
 import {
   Shield,
   Award,
@@ -10,7 +11,8 @@ import {
   LogIn,
   ArrowRight,
   Lock,
-  Mail
+  Mail,
+  AlertCircle
 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -27,6 +29,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [tab, setTab] = useState<'quick' | 'credentials'>('quick');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -84,6 +87,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = sanitizeInput(email);
+    if (!validateEmail(cleanEmail)) {
+      setAuthError('Por favor, informe um endereço de e-mail válido.');
+      return;
+    }
+    if (password.length < 6) {
+      setAuthError('A senha de acesso deve conter no mínimo 6 caracteres.');
+      return;
+    }
+    setAuthError(null);
     onLogin('admin');
   };
 
@@ -176,6 +189,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         ) : (
           /* Aba 2: Formulário Tradicional */
           <form onSubmit={handleCredentialsSubmit} className="space-y-4 text-xs">
+            {authError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
             <div>
               <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
                 E-mail Cadastrado

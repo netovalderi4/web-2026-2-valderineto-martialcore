@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import type { ModalityId, Invoice } from '../../types/martial';
-import { PLANS_DATA, INVOICES_DATA } from '../../mock/martialData';
+import type { ModalityId, Invoice, Plan } from '../../types/martial';
+import { PLANS_DATA, INVOICES_DATA, MODALITIES_DATA } from '../../mock/martialData';
 import { useMartialTheme } from '../../context/MartialThemeContext';
+import { sanitizeInput } from '../../utils/security';
 import {
   CheckCircle2,
   Clock,
   AlertTriangle,
   Tag,
   FileText,
-  Plus
+  Plus,
+  X,
+  AlertCircle
 } from 'lucide-react';
 
 interface FinanceManagementProps {
@@ -17,8 +20,63 @@ interface FinanceManagementProps {
 
 export const FinanceManagement: React.FC<FinanceManagementProps> = ({ selectedModality }) => {
   const { accentColor } = useMartialTheme();
+  const [plansList, setPlansList] = useState<Plan[]>(PLANS_DATA);
   const [invoices, setInvoices] = useState<Invoice[]>(INVOICES_DATA);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pago' | 'pendente' | 'atrasado'>('all');
+
+  // Modal de Criação de Plano
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Form states
+  const [planName, setPlanName] = useState('');
+  const [planType, setPlanType] = useState<'individual' | 'multi_artes'>('individual');
+  const [planPrice, setPlanPrice] = useState('180');
+  const [selectedMods, setSelectedMods] = useState<ModalityId[]>(['bjj']);
+  const [planDescription, setPlanDescription] = useState('Acesso ilimitado às aulas e tatames.');
+  const [planBadge, setPlanBadge] = useState('');
+
+  const toggleModality = (modId: ModalityId) => {
+    setSelectedMods(prev =>
+      prev.includes(modId)
+        ? prev.filter(m => m !== modId)
+        : [...prev, modId]
+    );
+  };
+
+  const handleCreatePlan = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanName = sanitizeInput(planName);
+    if (!cleanName || cleanName.length < 3) {
+      setFormError('Por favor, informe um nome para o plano (mínimo 3 letras).');
+      return;
+    }
+    const priceNum = parseFloat(planPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setFormError('Por favor, informe uma mensalidade válida maior que zero.');
+      return;
+    }
+    if (selectedMods.length === 0) {
+      setFormError('Selecione pelo menos uma modalidade inclusa no plano.');
+      return;
+    }
+
+    setFormError(null);
+    const newPlan: Plan = {
+      id: `plan_${Date.now()}`,
+      name: cleanName,
+      type: planType,
+      modalitiesIncluded: selectedMods,
+      priceMonthly: priceNum,
+      description: sanitizeInput(planDescription),
+      badge: planBadge ? sanitizeInput(planBadge) : undefined
+    };
+
+    setPlansList(prev => [newPlan, ...prev]);
+    setIsModalOpen(false);
+    setPlanName('');
+    alert(`Plano "${newPlan.name}" criado com sucesso no catálogo!`);
+  };
 
   const handleMarkAsPaid = (invoiceId: string) => {
     setInvoices(prev =>
@@ -47,7 +105,7 @@ export const FinanceManagement: React.FC<FinanceManagementProps> = ({ selectedMo
     return inv.status === statusFilter;
   });
 
-  const displayedPlans = PLANS_DATA.filter(p =>
+  const displayedPlans = plansList.filter(p =>
     selectedModality === 'all' || p.modalitiesIncluded.includes(selectedModality)
   );
 
@@ -66,7 +124,10 @@ export const FinanceManagement: React.FC<FinanceManagementProps> = ({ selectedMo
 
         <button
           type="button"
-          onClick={() => alert('Modal de criação de plano customizado!')}
+          onClick={() => {
+            setFormError(null);
+            setIsModalOpen(true);
+          }}
           style={{ backgroundColor: accentColor }}
           className="px-5 py-2.5 text-white font-bold text-xs rounded-xl transition shadow-sm hover:opacity-90 flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
         >
@@ -314,6 +375,149 @@ export const FinanceManagement: React.FC<FinanceManagementProps> = ({ selectedMo
           ))}
         </div>
       </div>
+
+      {/* Modal: Criar Novo Modelo de Plano */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg p-6 sm:p-7 relative shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1">
+              Criar Novo Modelo de Plano
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-5">
+              Configure planos individuais ou pacotes combinados multi-modalidades.
+            </p>
+
+            <form onSubmit={handleCreatePlan} className="space-y-4 text-xs">
+              {formError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                  Nome do Plano <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Plano Combate Total (BJJ + Muay Thai)"
+                  value={planName}
+                  onChange={e => setPlanName(e.target.value)}
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Tipo de Plano</label>
+                  <select
+                    value={planType}
+                    onChange={e => setPlanType(e.target.value as any)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="individual">Individual (1 Arte)</option>
+                    <option value="multi_artes">Multi-Artes (Combinado)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                    Valor Mensal (R$) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    required
+                    value={planPrice}
+                    onChange={e => setPlanPrice(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1.5">
+                  Modalidades Inclusas <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {MODALITIES_DATA.map(m => {
+                    const isChecked = selectedMods.includes(m.id);
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => toggleModality(m.id)}
+                        className={`p-2 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
+                          isChecked
+                            ? 'border-amber-500 bg-amber-500/10 font-bold text-zinc-900 dark:text-white'
+                            : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isChecked ? 'bg-amber-500' : 'bg-zinc-300'}`} />
+                        <span>{m.shortName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                    Destaque / Badge (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Mais Popular, Campeão"
+                    value={planBadge}
+                    onChange={e => setPlanBadge(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+                    Descrição Curta
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Acesso livre a tatames e ringues"
+                    value={planDescription}
+                    onChange={e => setPlanDescription(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl font-semibold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{ backgroundColor: accentColor }}
+                  className="px-5 py-2 text-white font-bold rounded-xl shadow-xs hover:opacity-90 transition cursor-pointer"
+                >
+                  Salvar Plano
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

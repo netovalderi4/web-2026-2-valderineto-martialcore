@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ModalityId, UserRole } from '../../types/martial';
 import { MODALITIES_DATA } from '../../mock/martialData';
 import { MartialIcon } from '../martial/MartialIcon';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { MartialCoreLogo } from '../ui/MartialCoreLogo';
+import { NotificationPopover, type NotificationItem } from './NotificationPopover';
 import { Bell, UserCircle2, Menu, LogOut } from 'lucide-react';
 
 interface NavbarProps {
@@ -21,6 +22,45 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMobileMenu,
   onLogout
 }) => {
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: 'n1',
+      title: '4 Atletas Aptos para Exame',
+      description: 'Lucas Mendonça atingiu 40 presenças e cumpriu carência em BJJ.',
+      timestamp: 'Há 15 min',
+      type: 'graduation',
+      modalityId: 'bjj',
+      read: false
+    },
+    {
+      id: 'n2',
+      title: 'Nova Reserva de Aula Experimental',
+      description: 'João Victor agendou aula de iniciante em Muay Thai (18h).',
+      timestamp: 'Há 1 hora',
+      type: 'booking',
+      modalityId: 'muay_thai',
+      read: false
+    },
+    {
+      id: 'n3',
+      title: 'Fatura a Vencer no Tatame',
+      description: 'Mensalidade de Pedro Silva vence em 2 dias (R$ 180,00).',
+      timestamp: 'Hoje às 09:30',
+      type: 'finance',
+      read: false
+    }
+  ]);
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const handleClearNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
   const currentModality = MODALITIES_DATA.find(m => m.id === selectedModality);
 
   const roleNames: Record<UserRole, { title: string; subtitle: string; badgeColor: string }> = {
@@ -133,23 +173,36 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <ThemeToggle />
 
-        {/* Notificações */}
-        <div className="relative hidden sm:block">
+        {/* Notificações Interativas */}
+        <div className="relative">
           <button
             type="button"
-            className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition cursor-pointer"
-            title="3 Alunos aptos para graduação"
+            onClick={() => setIsNotificationsOpen(prev => !prev)}
+            className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition cursor-pointer relative"
+            title={`${unreadCount} Notificações`}
+            aria-label="Abrir notificações do tatame"
           >
             <Bell className="w-4 h-4" />
-            <span
-              className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white dark:ring-zinc-950 animate-pulse ${
-                selectedModality === 'all' ? 'bg-zinc-950 dark:bg-white' : ''
-              }`}
-              style={{
-                backgroundColor: selectedModality !== 'all' && currentModality ? currentModality.accentColor : undefined
-              }}
-            />
+            {unreadCount > 0 && (
+              <span
+                className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white dark:ring-zinc-950 animate-pulse ${
+                  selectedModality === 'all' ? 'bg-amber-500' : ''
+                }`}
+                style={{
+                  backgroundColor: selectedModality !== 'all' && currentModality ? currentModality.accentColor : undefined
+                }}
+              />
+            )}
           </button>
+
+          {/* Popover Flutuante */}
+          <NotificationPopover
+            isOpen={isNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
+            notifications={notifications}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onClearNotification={handleClearNotification}
+          />
         </div>
 
         {/* Perfil do Usuário */}
