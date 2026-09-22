@@ -1,5 +1,4 @@
 import os
-import sys
 from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = r"C:\Users\valde\Desktop\Valderi\UFERSA\2026.2\Programação WEB\Projeto_MartialCore"
