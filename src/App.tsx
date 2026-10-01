@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ModalityId, UserRole } from './types/martial';
 import { ThemeProvider } from './context/ThemeContext';
 import { MartialThemeProvider, useMartialTheme } from './context/MartialThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AmbientAura } from './components/layout/AmbientAura';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -57,6 +58,11 @@ function SystemContainer({
   const [activeView, setActiveView] = useState<string>(() => getInitialView(currentRole));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
+  // Sincroniza a tela inicial quando o papel (role) for alterado pelo simulador
+  useEffect(() => {
+    setActiveView(getInitialView(currentRole));
+  }, [currentRole]);
+
   const { selectedModality, setSelectedModality } = useMartialTheme();
 
   // Renderizador da View do Sistema de acordo com o Perfil RBAC ativo
@@ -99,8 +105,15 @@ function SystemContainer({
           return <AttendanceSheet selectedModality={selectedModality} />;
         case 'evaluations':
           return <TechnicalEvaluation selectedModality={selectedModality} />;
-        case 'eligible':
+        case 'graduations':
           return <GraduationEligible selectedModality={selectedModality} />;
+        case 'schedules':
+          return (
+            <SchedulesManagement
+              selectedModality={selectedModality}
+              currentRole={currentRole}
+            />
+          );
         default:
           return <AttendanceSheet selectedModality={selectedModality} />;
       }
@@ -117,9 +130,6 @@ function SystemContainer({
               currentRole={currentRole}
             />
           );
-        case 'invoices':
-          // Blindagem RBAC: O aluno visualiza exclusivamente suas próprias faturas no Portal do Aluno
-          return <StudentPortal selectedModality={selectedModality} />;
         default:
           return <StudentPortal selectedModality={selectedModality} />;
       }
@@ -188,33 +198,23 @@ function SystemContainer({
   );
 }
 
-export default function App() {
-  const getUrlParams = () => {
-    if (typeof window === 'undefined') return { modality: 'all' as const, isAuth: false, isModalOpen: false, role: 'admin' as const };
-    const params = new URLSearchParams(window.location.search);
-    const role = (params.get('role') as UserRole) || 'admin';
-    const hasRole = Boolean(params.get('role'));
-    const isAuth = hasRole || params.get('auth') === 'true';
-    const isModalOpen = params.get('modal') === 'auth' || params.get('auth') === 'open';
-    const modality = (params.get('modality') as ModalityId | 'all') || 'all';
-    return { modality, isAuth, isModalOpen, role };
-  };
+function MainApp() {
+  const { isAuthenticated, currentRole, logout } = useAuth();
+  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>('all');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
-  const initialParams = getUrlParams();
-  const [selectedModality, setSelectedModality] = useState<ModalityId | 'all'>(initialParams.modality);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialParams.isAuth);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(initialParams.isModalOpen);
-  const [currentRole, setCurrentRole] = useState<UserRole>(initialParams.role);
-
-  const handleLogin = (role: UserRole) => {
-    setCurrentRole(role);
-    setIsAuthenticated(true);
-    setIsAuthModalOpen(false);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-  };
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('modal') === 'auth' || params.get('auth') === 'open') {
+        setIsAuthModalOpen(true);
+      }
+      const modalityParam = params.get('modality') as ModalityId;
+      if (modalityParam) {
+        setSelectedModality(modalityParam);
+      }
+    }
+  }, []);
 
   return (
     <ThemeProvider>
@@ -228,16 +228,24 @@ export default function App() {
             <AuthModal
               isOpen={isAuthModalOpen}
               onClose={() => setIsAuthModalOpen(false)}
-              onLogin={handleLogin}
+              onSuccess={() => setIsAuthModalOpen(false)}
             />
           </>
         ) : (
           <SystemContainer
             currentRole={currentRole}
-            onLogout={handleLogout}
+            onLogout={logout}
           />
         )}
       </MartialThemeProvider>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

@@ -123,7 +123,7 @@ export const MartialCoreLogo: React.FC<MartialCoreLogoProps> = ({
               </span>
             </span>
           </div>
-          <span className={`block font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-semibold ${dimensions.subClass} mt-0.5`}>
+          <span className={`hidden sm:block font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-semibold ${dimensions.subClass} mt-0.5`}>
             Centro de Treinamento
           </span>
         </div>
