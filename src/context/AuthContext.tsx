@@ -21,6 +21,8 @@ export interface AuthUser {
   email: string;
   name: string;
   isCognito: boolean;
+  authProvider?: 'cognito' | 'google' | 'demo';
+  picture?: string;
 }
 
 export interface AuthContextType {
@@ -31,6 +33,7 @@ export interface AuthContextType {
   error: string | null;
   clearError: () => void;
   loginWithCognito: (email: string, password: string) => Promise<{ nextStep?: string }>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   signUpWithCognito: (name: string, email: string, password: string) => Promise<{ nextStep?: string }>;
   confirmSignUpCode: (email: string, code: string) => Promise<void>;
   resendConfirmationCode: (email: string) => Promise<void>;
@@ -194,6 +197,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Login com Google OAuth 2.0 (Google Identity Services / JWT)
+  const loginWithGoogle = async (credential: string) => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      // 1. Decodificação real do payload JWT emitido pelo Google (Base64Url)
+      const parts = credential.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Token JWT do Google inválido.');
+      }
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const payload = JSON.parse(jsonPayload);
+
+      // 2. EXIBIÇÃO NO CONSOLE COM ETIQUETAS OFICIAIS (PARA O PRINT DA ATIVIDADE)
+      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
+      console.log('%c🔐 GOOGLE OAUTH 2.0 - TOKEN JWT EMITIDO PELA GOOGLE', 'color: #34A853; font-weight: bold; font-size: 14px;');
+      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
+      console.log('%c[TOKEN JWT COMPLETO (Copie e cole no jwt.io)]:', 'color: #FBBC05; font-weight: bold;', credential);
+      console.log('%c[PAYLOAD DECODIFICADO DO GOOGLE]:', 'color: #EA4335; font-weight: bold;', payload);
+      console.log('📌 Emissor (iss):', payload.iss);
+      console.log('📌 Client ID (aud):', payload.aud);
+      console.log('📌 E-mail autenticado:', payload.email);
+      console.log('📌 E-mail verificado:', payload.email_verified);
+      console.log('📌 Nome:', payload.name);
+      console.log('📌 Sub (ID Google):', payload.sub);
+      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
+
+      // Armazena no sessionStorage para fácil inspeção na aba Application do DevTools
+      sessionStorage.setItem('google_id_token', credential);
+      sessionStorage.setItem('google_token_payload', JSON.stringify(payload, null, 2));
+
+      const isValderiAdmin =
+        (payload.email && payload.email.toLowerCase().includes('valderi')) ||
+        (payload.email && payload.email.toLowerCase().includes('admin'));
+      const role: UserRole = isValderiAdmin ? 'admin' : 'student';
+
+      const authUser: AuthUser = {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        isCognito: false,
+        authProvider: 'google',
+        picture: payload.picture
+      };
+
+      setUser(authUser);
+      setCurrentRole(role);
+      setIsAuthenticated(true);
+      localStorage.setItem(
+        LOCAL_STORAGE_SESSION_KEY,
+        JSON.stringify({ user: authUser, currentRole: role })
+      );
+    } catch (err: unknown) {
+      console.error('Erro na autenticação com Google:', err);
+      setError('Falha ao autenticar com a conta do Google.');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Cadastro de novo usuário no AWS Cognito
   const signUpWithCognito = async (name: string, email: string, password: string) => {
     setError(null);
@@ -351,6 +422,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error,
         clearError,
         loginWithCognito,
+        loginWithGoogle,
         signUpWithCognito,
         confirmSignUpCode,
         resendConfirmationCode,

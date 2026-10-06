@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { MartialCoreLogo } from '../ui/MartialCoreLogo';
 import { validateEmail, sanitizeInput } from '../../utils/security';
@@ -15,6 +15,35 @@ import {
   UserPlus
 } from 'lucide-react';
 
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+            auto_select?: boolean;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: 'outline' | 'filled_blue' | 'filled_black';
+              size?: 'large' | 'medium' | 'small';
+              type?: 'standard' | 'icon';
+              text?: 'signin_with' | 'signup_with' | 'continue_with';
+              shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+              logo_alignment?: 'left' | 'center';
+              width?: number;
+            }
+          ) => void;
+          prompt?: () => void;
+        };
+      };
+    };
+  }
+}
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +59,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const {
     loginWithCognito,
+    loginWithGoogle,
     signUpWithCognito,
     confirmSignUpCode,
     resendConfirmationCode,
@@ -37,6 +67,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     confirmPasswordReset,
     clearError
   } = useAuth();
+
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
@@ -58,6 +90,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLocalSuccess(null);
     onClose();
   };
+
+  // Inicialização do Google Identity Services (OAuth 2.0 / JWT)
+  useEffect(() => {
+    if (!isOpen || (mode !== 'signin' && mode !== 'signup')) return;
+
+    const clientId =
+      import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+      '403405116649-odotca7r4cqpno60db71raddjfehafas.apps.googleusercontent.com';
+
+    const setupGoogle = () => {
+      if (window.google?.accounts?.id && googleButtonRef.current) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: async (response: { credential: string }) => {
+              if (response.credential) {
+                try {
+                  setIsSubmitting(true);
+                  await loginWithGoogle(response.credential);
+                  handleClose();
+                  if (onSuccess) onSuccess();
+                } catch (err: unknown) {
+                  setLocalError(
+                    err instanceof Error ? err.message : 'Falha ao autenticar com o Google.'
+                  );
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }
+            }
+          });
+
+          // Limpa qualquer botão renderizado anteriormente antes de injetar
+          googleButtonRef.current.innerHTML = '';
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'filled_black',
+            size: 'large',
+            type: 'standard',
+            text: mode === 'signup' ? 'signup_with' : 'signin_with',
+            shape: 'pill',
+            logo_alignment: 'left',
+            width: 320
+          });
+        } catch (e) {
+          console.warn('Google Identity Services ainda não disponível:', e);
+        }
+      }
+    };
+
+    // Tenta renderizar imediatamente ou aguarda carregar o script
+    setupGoogle();
+    const timer = setInterval(() => {
+      if (window.google?.accounts?.id && googleButtonRef.current?.children.length === 0) {
+        setupGoogle();
+      }
+    }, 400);
+
+    return () => clearInterval(timer);
+  }, [isOpen, mode]);
 
   // 1. Login com AWS Cognito
   const handleSignIn = async (e: React.FormEvent) => {
@@ -363,6 +454,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 text-center pt-2">
               Autenticação segura via <strong>AWS Cognito User Pool</strong>
             </p>
+
+            {/* Divisor Visual para Google OAuth */}
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="border-t border-zinc-200 dark:border-zinc-800 w-full absolute" />
+              <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-mono text-zinc-400 dark:text-zinc-500 relative uppercase tracking-wider">
+                ou entrar com
+              </span>
+            </div>
+
+            {/* Botão Oficial do Google Identity Services (Renderizado pelo SDK da Google) */}
+            <div className="flex flex-col items-center justify-center gap-1.5 w-full pt-1 pb-1">
+              <div ref={googleButtonRef} className="flex justify-center w-full min-h-[44px]" />
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 text-center">
+                OAuth 2.0 • Emissão e assinatura oficial de JWT pela Google
+              </span>
+            </div>
           </form>
         )}
 

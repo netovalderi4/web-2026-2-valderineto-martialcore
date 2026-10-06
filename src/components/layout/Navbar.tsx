@@ -291,14 +291,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                     {authenticatedName}
                   </span>
-                  {auth?.user?.isCognito ? (
+                  {auth?.user?.authProvider === 'google' ? (
+                    <span className="text-[9px] font-mono bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
+                      Google OAuth
+                    </span>
+                  ) : auth?.user?.isCognito ? (
                     <span className="text-[9px] font-mono bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
                       <Cloud className="w-2.5 h-2.5" />
                       Cognito
                     </span>
                   ) : (
                     <span className="text-[9px] font-mono bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5 rounded font-bold">
-                      Demo RBAC
+                      Conectado
                     </span>
                   )}
                 </div>
