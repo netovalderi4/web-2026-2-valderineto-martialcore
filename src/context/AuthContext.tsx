@@ -217,21 +217,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       const payload = JSON.parse(jsonPayload);
 
-      // 2. EXIBIÇÃO NO CONSOLE COM ETIQUETAS OFICIAIS (PARA O PRINT DA ATIVIDADE)
-      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
-      console.log('%c🔐 GOOGLE OAUTH 2.0 - TOKEN JWT EMITIDO PELA GOOGLE', 'color: #34A853; font-weight: bold; font-size: 14px;');
-      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
-      console.log('%c[TOKEN JWT COMPLETO (Copie e cole no jwt.io)]:', 'color: #FBBC05; font-weight: bold;', credential);
-      console.log('%c[PAYLOAD DECODIFICADO DO GOOGLE]:', 'color: #EA4335; font-weight: bold;', payload);
-      console.log('📌 Emissor (iss):', payload.iss);
-      console.log('📌 Client ID (aud):', payload.aud);
-      console.log('📌 E-mail autenticado:', payload.email);
-      console.log('📌 E-mail verificado:', payload.email_verified);
-      console.log('📌 Nome:', payload.name);
-      console.log('📌 Sub (ID Google):', payload.sub);
-      console.log('%c======================================================', 'color: #4285F4; font-weight: bold;');
-
-      // Armazena no sessionStorage para fácil inspeção na aba Application do DevTools
+      // Armazena no sessionStorage para persistência da sessão e auditoria na aba Application
       sessionStorage.setItem('google_id_token', credential);
       sessionStorage.setItem('google_token_payload', JSON.stringify(payload, null, 2));
 
