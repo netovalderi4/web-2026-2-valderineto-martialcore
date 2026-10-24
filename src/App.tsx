@@ -10,6 +10,7 @@ import { ModalityHeroBanner } from './components/layout/ModalityHeroBanner';
 import { BottomNavMobile } from './components/layout/BottomNavMobile';
 import { LandingPage } from './pages/LandingPage';
 import { AuthModal } from './components/auth/AuthModal';
+import { SenseiKuroWidget } from './components/chat/SenseiKuroWidget';
 
 // Admin Views
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -186,6 +187,9 @@ function SystemContainer({
             {renderSystemView()}
           </main>
         </div>
+
+        {/* Widget Flutuante do Sensei Kuro (IA via WebSocket + Gemini) */}
+        <SenseiKuroWidget />
 
         {/* Navegação Inferior Otimizada para Mobile (Bottom Navigation) */}
         <BottomNavMobile
