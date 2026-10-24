@@ -20,7 +20,7 @@ interface WebSocketResponse {
 
 const PRIMARY_WS_URL =
   import.meta.env.VITE_WEBSOCKET_API_URL ||
-  'wss://api.valderi.mestre.web.ufersa.dev.br/prod/';
+  'wss://api.valderi.mestre.web.ufersa.dev.br/';
 
 const DIRECT_WS_URL =
   import.meta.env.VITE_WEBSOCKET_API_DIRECT_URL ||
