@@ -52,6 +52,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_SESSION_KEY = 'martialcore_auth_session';
 
+// Normaliza URLs do S3 com pontos no nome do bucket para o formato Path-Style compatível com SSL
+export const normalizeS3Url = (url?: string): string | undefined => {
+  if (!url) return undefined;
+  return url.replace(
+    'https://valderi-profile-2026.2.s3.us-east-1.amazonaws.com/',
+    'https://s3.us-east-1.amazonaws.com/valderi-profile-2026.2/'
+  );
+};
+
 interface StoredSession {
   user: AuthUser;
   currentRole: UserRole;
@@ -134,6 +143,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
 
+          if (authUser.picture) {
+            authUser.picture = normalizeS3Url(authUser.picture);
+          }
+
           setUser(authUser);
           setCurrentRole(savedRole);
           setIsAuthenticated(true);
@@ -147,6 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const stored = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
         if (stored) {
           const parsed = JSON.parse(stored) as StoredSession;
+          if (parsed.user.picture) {
+            parsed.user.picture = normalizeS3Url(parsed.user.picture);
+          }
           setUser(parsed.user);
           setCurrentRole(parsed.currentRole);
           setIsAuthenticated(true);
@@ -411,7 +427,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUserProfile = (data: Partial<AuthUser>) => {
     setUser(prev => {
       if (!prev) return null;
-      const updated: AuthUser = { ...prev, ...data };
+      const normalizedData = { ...data };
+      if (normalizedData.picture) {
+        normalizedData.picture = normalizeS3Url(normalizedData.picture);
+      }
+      const updated: AuthUser = { ...prev, ...normalizedData };
       try {
         const stored = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
         if (stored) {

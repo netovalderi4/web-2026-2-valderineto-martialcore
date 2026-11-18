@@ -6,7 +6,7 @@ import { ThemeToggle } from '../ui/ThemeToggle';
 import { MartialCoreLogo } from '../ui/MartialCoreLogo';
 import { NotificationPopover, type NotificationItem } from './NotificationPopover';
 import { ProfileModal } from '../profile/ProfileModal';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, normalizeS3Url } from '../../context/AuthContext';
 import {
   Bell,
   UserCircle2,
@@ -260,9 +260,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Clique para alternar o perfil ativo (Simulador RBAC)"
           >
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-              {auth?.user?.picture ? (
+              {normalizeS3Url(auth?.user?.picture) ? (
                 <img
-                  src={auth.user.picture}
+                  src={normalizeS3Url(auth?.user?.picture)!}
                   alt={authenticatedName}
                   className="w-full h-full object-cover"
                   onError={(e) => {

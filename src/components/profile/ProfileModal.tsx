@@ -14,7 +14,7 @@ import {
   Cloud,
   Loader2
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, normalizeS3Url } from '../../context/AuthContext';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -56,7 +56,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       setPhone(user.phone || '(84) 99876-5432');
       setModality(user.modality || 'Brazilian Jiu-Jitsu');
       setBio(user.bio || 'Atleta e Gestor no Tatame MartialCore');
-      setPhotoPreview(user.picture || null);
+      setPhotoPreview(normalizeS3Url(user.picture) || null);
       setPhotoBase64(null);
       setSuccessMessage(null);
       setErrorMessage(null);
@@ -132,7 +132,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       }
 
       const resData = await response.json();
-      const savedPhotoUrl = resData.data?.photoUrl || photoPreview;
+      const rawPhotoUrl = resData.data?.photoUrl || photoPreview;
+      const savedPhotoUrl = normalizeS3Url(rawPhotoUrl) || photoPreview;
 
       setUploadedS3Url(savedPhotoUrl);
       setSuccessMessage('Perfil atualizado com sucesso no Amazon DynamoDB e S3!');
@@ -143,7 +144,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         phone: phone.trim(),
         modality,
         bio: bio.trim(),
-        picture: savedPhotoUrl
+        picture: savedPhotoUrl || undefined
       });
     } catch (err: unknown) {
       console.error('Falha ao atualizar perfil no API Gateway:', err);
