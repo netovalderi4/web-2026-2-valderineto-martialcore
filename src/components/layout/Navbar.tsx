@@ -5,6 +5,7 @@ import { MartialIcon } from '../martial/MartialIcon';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { MartialCoreLogo } from '../ui/MartialCoreLogo';
 import { NotificationPopover, type NotificationItem } from './NotificationPopover';
+import { ProfileModal } from '../profile/ProfileModal';
 import { useAuth } from '../../context/AuthContext';
 import {
   Bell,
@@ -18,7 +19,8 @@ import {
   Users,
   Check,
   Cloud,
-  GraduationCap
+  GraduationCap,
+  Camera
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -39,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const auth = useAuth();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
@@ -257,7 +260,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Clique para alternar o perfil ativo (Simulador RBAC)"
           >
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-              <UserCircle2 className="w-6 h-6 text-zinc-500 dark:text-zinc-300" />
+              {auth?.user?.picture ? (
+                <img
+                  src={auth.user.picture}
+                  alt={authenticatedName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <UserCircle2 className="w-6 h-6 text-zinc-500 dark:text-zinc-300" />
+              )}
             </div>
             <div className="hidden xl:block text-left">
               <div className="flex items-center gap-1">
@@ -312,6 +326,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </p>
                 )}
               </div>
+
+              {/* Botão de Edição de Perfil Cadastral (S3 / DynamoDB) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  setIsProfileModalOpen(true);
+                }}
+                className="w-full py-2 px-2.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 flex items-center justify-between transition cursor-pointer shadow-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Editar Perfil & Foto</span>
+                </div>
+                <span className="text-[9px] font-mono opacity-80 font-bold bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded">
+                  S3 / DynamoDB
+                </span>
+              </button>
 
               {/* Banner de Avaliação Acadêmica */}
               <div className="p-2.5 bg-amber-500/10 border border-amber-500/25 rounded-xl text-[11px] text-zinc-700 dark:text-zinc-300 space-y-1">
@@ -425,6 +457,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         );
       })}
     </nav>
+
+    {/* Modal de Edição de Perfil e Foto (S3 & DynamoDB) */}
+    <ProfileModal
+      isOpen={isProfileModalOpen}
+      onClose={() => setIsProfileModalOpen(false)}
+    />
   </>
   );
 };

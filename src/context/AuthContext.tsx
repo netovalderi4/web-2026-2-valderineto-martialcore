@@ -23,6 +23,9 @@ export interface AuthUser {
   isCognito: boolean;
   authProvider?: 'cognito' | 'google' | 'demo';
   picture?: string;
+  phone?: string;
+  modality?: string;
+  bio?: string;
 }
 
 export interface AuthContextType {
@@ -41,6 +44,7 @@ export interface AuthContextType {
   confirmPasswordReset: (email: string, code: string, newPassword: string) => Promise<void>;
   loginAsQuickRole: (role: UserRole) => void;
   switchRole: (role: UserRole) => void;
+  updateUserProfile: (data: Partial<AuthUser>) => void;
   logout: () => Promise<void>;
 }
 
@@ -112,12 +116,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const stored = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
           const savedRole = stored ? (JSON.parse(stored) as StoredSession).currentRole : defaultRole;
 
-          const authUser: AuthUser = {
+          let authUser: AuthUser = {
             id: cognitoUser.userId,
             email,
             name,
             isCognito: true
           };
+
+          // Mescla perfil persistido (foto do S3, telefone, bio) se existir
+          const cachedProfile = localStorage.getItem(`martialcore_profile_${cognitoUser.userId}`);
+          if (cachedProfile) {
+            try {
+              const parsedProfile = JSON.parse(cachedProfile);
+              authUser = { ...authUser, ...parsedProfile };
+            } catch {
+              // ignora erro de parse
+            }
+          }
 
           setUser(authUser);
           setCurrentRole(savedRole);
@@ -355,12 +370,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       visitor: { name: 'Visitante Experimental', email: 'visitante@martialcore.ct' }
     };
 
-    const authUser: AuthUser = {
+    let authUser: AuthUser = {
       id: `quick-${role}`,
       name: demoProfiles[role].name,
       email: demoProfiles[role].email,
       isCognito: false
     };
+
+    const cachedProfile = localStorage.getItem(`martialcore_profile_${authUser.id}`);
+    if (cachedProfile) {
+      try {
+        const parsedProfile = JSON.parse(cachedProfile);
+        authUser = { ...authUser, ...parsedProfile };
+      } catch {
+        // ignora erro de parse
+      }
+    }
 
     setUser(authUser);
     setCurrentRole(role);
@@ -383,6 +408,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Logout seguro
+  const updateUserProfile = (data: Partial<AuthUser>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated: AuthUser = { ...prev, ...data };
+      try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored) as StoredSession;
+          parsed.user = updated;
+          localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(parsed));
+        } else {
+          localStorage.setItem(
+            LOCAL_STORAGE_SESSION_KEY,
+            JSON.stringify({ user: updated, currentRole })
+          );
+        }
+        localStorage.setItem(`martialcore_profile_${updated.id}`, JSON.stringify(updated));
+      } catch (err) {
+        console.error('Erro ao persistir perfil atualizado:', err);
+      }
+      return updated;
+    });
+  };
+
   const logout = async () => {
     try {
       if (user?.isCognito) {
@@ -416,6 +465,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         confirmPasswordReset,
         loginAsQuickRole,
         switchRole,
+        updateUserProfile,
         logout
       }}
     >
