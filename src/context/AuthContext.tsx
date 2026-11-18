@@ -23,6 +23,7 @@ export interface AuthUser {
   isCognito: boolean;
   authProvider?: 'cognito' | 'google' | 'demo';
   picture?: string;
+  localPhoto?: string;
   phone?: string;
   modality?: string;
   bio?: string;
@@ -370,22 +371,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       visitor: { name: 'Visitante Experimental', email: 'visitante@martialcore.ct' }
     };
 
-    let authUser: AuthUser = {
+    const authUser: AuthUser = {
       id: `quick-${role}`,
       name: demoProfiles[role].name,
       email: demoProfiles[role].email,
       isCognito: false
     };
-
-    const cachedProfile = localStorage.getItem(`martialcore_profile_${authUser.id}`);
-    if (cachedProfile) {
-      try {
-        const parsedProfile = JSON.parse(cachedProfile);
-        authUser = { ...authUser, ...parsedProfile };
-      } catch {
-        // ignora erro de parse
-      }
-    }
 
     setUser(authUser);
     setCurrentRole(role);

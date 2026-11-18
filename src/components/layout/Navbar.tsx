@@ -260,13 +260,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Clique para alternar o perfil ativo (Simulador RBAC)"
           >
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-              {auth?.user?.picture ? (
+              {auth?.user?.localPhoto || auth?.user?.picture ? (
                 <img
-                  src={auth.user.picture}
+                  src={auth.user.localPhoto || auth.user.picture}
                   alt={authenticatedName}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
+                    if (auth.user?.localPhoto && (e.target as HTMLImageElement).src !== auth.user.localPhoto) {
+                      (e.target as HTMLImageElement).src = auth.user.localPhoto;
+                    } else {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }
                   }}
                 />
               ) : (

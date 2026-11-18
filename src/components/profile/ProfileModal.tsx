@@ -56,7 +56,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       setPhone(user.phone || '(84) 99876-5432');
       setModality(user.modality || 'Brazilian Jiu-Jitsu');
       setBio(user.bio || 'Atleta e Gestor no Tatame MartialCore');
-      setPhotoPreview(user.picture || null);
+      setPhotoPreview(user.localPhoto || user.picture || null);
       setPhotoBase64(null);
       setSuccessMessage(null);
       setErrorMessage(null);
@@ -133,6 +133,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
       const resData = await response.json();
       const savedPhotoUrl = resData.data?.photoUrl || photoPreview;
+      const displayPhoto = photoPreview || photoBase64 || savedPhotoUrl;
 
       setUploadedS3Url(savedPhotoUrl);
       setSuccessMessage('Perfil atualizado com sucesso no Amazon DynamoDB e S3!');
@@ -143,7 +144,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         phone: phone.trim(),
         modality,
         bio: bio.trim(),
-        picture: savedPhotoUrl
+        picture: savedPhotoUrl,
+        localPhoto: displayPhoto || undefined
       });
     } catch (err: unknown) {
       console.error('Falha ao atualizar perfil no API Gateway:', err);
@@ -198,6 +200,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                     src={photoPreview}
                     alt="Foto de Perfil"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      if (user?.localPhoto && (e.target as HTMLImageElement).src !== user.localPhoto) {
+                        (e.target as HTMLImageElement).src = user.localPhoto;
+                      }
+                    }}
                   />
                 ) : (
                   <User className="w-10 h-10 text-zinc-400" />
